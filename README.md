@@ -1,5 +1,10 @@
 # Data API
 
+Project link: [https://github.com/mkfam7/solaxx3_api][project_link]
+
+[project_link]: https://github.com/mkfam7/solaxx3_api
+
+
 This API stores data from the inverter. It supports multiple users with permissions to only one set of data. It currently uses an SQLite database but can be configured otherwise.
 
 ## Prerequisites
@@ -30,6 +35,12 @@ python3 manage.py changepassword [USERNAME]
 ```
 
 By default, `USERNAME` is `admin`. However, if Django sees that you have only one user, this parameter is optional.
+
+4. To ensure proper handling of templates and static files, run the following command:
+
+```bash
+python3 manage.py collectstatic
+```
 
 ## Usage
 
