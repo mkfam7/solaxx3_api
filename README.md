@@ -1,5 +1,7 @@
 # Data API
 
+**Warning:** This API is not yet in its production phase. Therefore the API is not yet secure.
+
 Project link: [https://github.com/mkfam7/solaxx3_api][project_link]
 
 [project_link]: https://github.com/mkfam7/solaxx3_api
@@ -17,30 +19,30 @@ pip3 install -r requirements.txt
 
 2. To create the table schemas, run the following in the project directory:
 
-```bash
-python3 manage.py migrate
-```
+    ```bash
+    python3 manage.py migrate
+    ```
 
 3. To be able to authenticate in API requests, create a superuser (user that has all permissions):
 
-```bash
-python3 manage.py createsuperuser
-```
+    ```bash
+    python3 manage.py createsuperuser
+    ```
 
-You will be asked for a username, optional email, and password.  
-In case you forgot your password, use this syntax to change your password:
+    You will be asked for a username, optional email, and password.  
+    In case you forgot your password, use this syntax to change your password:
 
-```bash
-python3 manage.py changepassword [USERNAME]
-```
+    ```bash
+    python3 manage.py changepassword [USERNAME]
+    ```
 
-By default, `USERNAME` is `admin`. However, if Django sees that you have only one user, this parameter is optional.
+    By default, `USERNAME` is `admin`. However, if Django sees that you have only one user, this parameter is optional.
 
 4. To ensure proper handling of templates and static files, run the following command:
 
-```bash
-python3 manage.py collectstatic
-```
+   ```bash
+   python3 manage.py collectstatic
+   ```
 
 ## Usage
 
