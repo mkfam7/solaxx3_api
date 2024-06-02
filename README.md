@@ -1,6 +1,6 @@
 # Data API
 
-**Warning:** This API is not yet in its production phase. Therefore the API is not yet secure.
+**Warning:** *This API is not yet in its production phase. Therefore the API is not yet secure. However, it supports basic and session authentication using cookies. It currently does not completely support CSRF.*
 
 Project link: [https://github.com/mkfam7/solaxx3_api][project_link]
 
@@ -13,9 +13,9 @@ This API stores data from the inverter. It supports multiple users with permissi
 
 1. Install the requirements.
 
-```bash
-pip3 install -r requirements.txt
-```
+    ```bash
+    pip3 install -r requirements.txt
+    ```
 
 2. To create the table schemas, run the following in the project directory:
 
@@ -36,7 +36,7 @@ pip3 install -r requirements.txt
     python3 manage.py changepassword [USERNAME]
     ```
 
-    By default, `USERNAME` is `admin`. However, if Django sees that you have only one user, this parameter is optional.
+    By default, `USERNAME` is `admin`.
 
 4. To ensure proper handling of templates and static files, run the following command:
 
