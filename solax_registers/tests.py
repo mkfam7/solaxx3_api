@@ -7,20 +7,23 @@ from rest_framework.test import APITestCase
 
 from .models import DailyStatsRecord
 
+User = get_user_model()
+
 
 class AddHistoryStatsTests(APITestCase):
-    """Test POST requests on daily stats model."""
+    """Tests for adding history stats."""
 
     @classmethod
     def setUpTestData(cls) -> None:
-        get_user_model().objects.create(
+        """Set up test data."""
+        User.objects.create(
             username="testuser",
             password="testuser1!",
             is_staff=True,
             is_active=True,
             is_superuser=True,
         )
-        cls.testuser = get_user_model().objects.get(username="testuser")
+        cls.testuser = User.objects.get(username="testuser")
 
     def test_add_valid_data(self):
         """Test adding a record with valid data."""
