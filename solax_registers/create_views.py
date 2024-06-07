@@ -1,5 +1,5 @@
 from operator import attrgetter
-from typing import Dict, Tuple, Type, Union
+from typing import Dict, List, Tuple, Type, Union
 
 from django.db.models import Model
 
@@ -22,7 +22,7 @@ def create_views(
     upload_date_column: str,
     model_serializer: Type[ModelSerializer],
     last_record_model_serializer: Type[ModelSerializer],
-    docs: list[dict[str, str]],
+    docs: List[Dict[str, str]],
 ) -> Tuple[generics.ListCreateAPIView]:
     """A function that returns two views.
     Parameters:
