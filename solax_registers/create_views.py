@@ -1,7 +1,9 @@
 from operator import attrgetter
+from typing import Dict, Tuple, Type, Union
 
 from django.db.models import Model
-from drf_spectacular.types import *
+
+from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import (
     OpenApiExample,
     OpenApiParameter,
@@ -18,10 +20,10 @@ from .utils import set_subtract
 
 def create_views(
     upload_date_column: str,
-    model_serializer: type[ModelSerializer],
-    last_model_serializer: type[ModelSerializer],
+    model_serializer: Type[ModelSerializer],
+    last_record_model_serializer: Type[ModelSerializer],
     docs: list[dict[str, str]],
-) -> tuple[generics.ListCreateAPIView]:
+) -> Tuple[generics.ListCreateAPIView]:
     """A function that returns two views.
     Parameters:
 
@@ -29,7 +31,7 @@ def create_views(
     :param model_serializer: serializer of model.
     :param last_model_serializer: serializer of the model keeping the last record.
     :param docs: documentation for the views. Example:
-        ```py
+        ```python
     [
         # for history stats
         {
@@ -190,7 +192,7 @@ def create_views(
 
     class ListAddDeleteStats(generics.ListCreateAPIView):
         serializer_class = model_serializer
-        model: type[Model] = model_serializer.Meta.model
+        model: Type[Model] = model_serializer.Meta.model
 
         @extend_schema(
             parameters=GET_PARAMETERS,
@@ -202,7 +204,9 @@ def create_views(
             description=docs[0]["get"],
             summary=docs[0]["get"],
         )
-        def get(self, request: Request):
+        def get(self, request: Request) -> Response:
+            """Get some data."""
+
             query_parameters = request.query_params
 
             since = query_parameters.get("since")
@@ -215,7 +219,7 @@ def create_views(
             if len(stats) == 0:
                 return MISSING_STATS
 
-            elif stats != ["all"] and extra_fields != []:
+            if stats != ["all"] and extra_fields:
                 return extra_fields_passed(extra_fields)
 
             serializer = self._get_filtered_data(stats, filter_range)
@@ -225,13 +229,16 @@ def create_views(
             model_fields = self._get_model_fields()
             return set_subtract(fields, model_fields)
 
-        def _get_filtered_data(self, stats: list, filter_range: list):
+        def _get_filtered_data(
+            self, stats: list, filter_range: list
+        ) -> Type[ModelSerializer]:
             since, before = filter_range
 
             if self._must_not_return_all_stats(stats):
                 queryset = self.model.objects.filter(
                     **self._construct_filter_params(since, before)
                 ).values(*stats)
+
             else:
                 if self._is_no_timerange_specified(since, before):
                     queryset = self.model.objects.all().values()
@@ -243,19 +250,21 @@ def create_views(
             serializer = self.serializer_class(queryset, many=True)
             return serializer
 
-        def _must_not_return_all_stats(self, stats):
+        def _must_not_return_all_stats(self, stats: list) -> bool:
             return stats != ["all"]
 
-        def _is_no_timerange_specified(self, since, before):
+        def _is_no_timerange_specified(
+            self, since: Union[str, None], before: Union[str, None]
+        ) -> bool:
             return (since, before) == (None, None)
 
         def _construct_filter_params(
-            self, since: None | str, before: None | str
-        ) -> dict[str, str]:
+            self, since: Union[str, None], before: Union[str, None]
+        ) -> Dict[str, str]:
             filter_params = {}
-            if since != None:
+            if since is not None:
                 filter_params[f"{upload_date_column}__gte"] = since
-            if before != None:
+            if before is not None:
                 filter_params[f"{upload_date_column}__lte"] = before
 
             return filter_params
@@ -270,10 +279,15 @@ def create_views(
             },
             parameters=POST_PARAMETERS,
         )
-        def post(self, request: Request):
+        def post(self, request: Request) -> Response:
+            """Add some data."""
+
             force_create = request.query_params.get("force", "false")
-            self._is_force_create_valid(force_create)
-            overwrite = True if force_create == "true" else False
+            if not self._is_force_create_valid(force_create):
+                MESSAGE = "'force' parameter must be either 'true' or 'false'"
+                return Response({"detail": MESSAGE}, status.HTTP_400_BAD_REQUEST)
+
+            overwrite = force_create == "true"
 
             extra_fields = self._return_extra_fields_in_data(request.data)
             if len(extra_fields) > 0:
@@ -286,7 +300,7 @@ def create_views(
 
             return super().post(request)
 
-        def _is_force_create_valid(self, force_create: str):
+        def _is_force_create_valid(self, force_create: str) -> bool:
             return force_create in ("true", "false")
 
         def _return_extra_fields_in_data(self, data: dict) -> list:
@@ -307,7 +321,7 @@ def create_views(
                 (500, "text/html"): OpenApiResponse(response=OpenApiTypes.ANY),
             },
         )
-        def delete(self, request: Request):
+        def delete(self, request: Request) -> Response:
             MODE_ACTION_MAPPING = {
                 "delete_older_than": self._delete_older_than_date,
                 "truncate": self._truncate,
@@ -325,7 +339,7 @@ def create_views(
 
             return MODE_ACTION_MAPPING[mode](args)
 
-        def _delete_older_than_date(self, args: list):
+        def _delete_older_than_date(self, args: list) -> Response:
             if args == []:
                 MESSAGE = "Argument 'date' in 'args' (0) is mandatory."
                 return Response({"detail": MESSAGE}, status.HTTP_400_BAD_REQUEST)
@@ -338,13 +352,15 @@ def create_views(
             no_deleted, _ = queryset.delete()
             return Response({"deleted": no_deleted}, status.HTTP_200_OK)
 
-        def _truncate(self, args: list):
+        def _truncate(self, args: list) -> Response:
             no_deleted, _ = self.model.objects.all().delete()
             return Response({"deleted": no_deleted})
 
     class GetUpdateLastStats(generics.ListCreateAPIView):
-        serializer_class = last_model_serializer
-        model: type[Model] = serializer_class.Meta.model
+        """Actions for the last record view."""
+
+        serializer_class = last_record_model_serializer
+        model: Type[Model] = serializer_class.Meta.model
 
         @extend_schema(
             parameters=[STATS_PARAM],
@@ -357,6 +373,8 @@ def create_views(
             summary=docs[1]["get"],
         )
         def get(self, request: Request) -> Response:
+            """Get some data."""
+
             query_params = request.query_params
             stats = query_params.getlist("stats")
             extra_fields = self._return_extra_fields(stats)
@@ -365,7 +383,7 @@ def create_views(
                 MESSAGE = "Query parameter 'stats' is mandatory."
                 return Response({"detail": MESSAGE}, status.HTTP_400_BAD_REQUEST)
 
-            elif stats != ["all"] and extra_fields != []:
+            if stats != ["all"] and extra_fields:
                 DATA = {"Some extra fields were passed:": extra_fields}
                 return Response(DATA, status.HTTP_400_BAD_REQUEST)
 
@@ -376,7 +394,7 @@ def create_views(
             model_fields = self._get_model_fields()
             return set_subtract(fields, model_fields)
 
-        def _get_data(self, stats) -> type[ModelSerializer]:
+        def _get_data(self, stats) -> Type[ModelSerializer]:
             if self._must_not_return_all_stats(stats):
                 queryset = self.model.objects.values(*stats)
             else:
@@ -385,7 +403,7 @@ def create_views(
             serializer = self.serializer_class(queryset, many=True)
             return serializer
 
-        def _must_not_return_all_stats(self, stats):
+        def _must_not_return_all_stats(self, stats: list) -> bool:
             return stats != ["all"]
 
         @extend_schema(
@@ -398,6 +416,8 @@ def create_views(
             },
         )
         def post(self, request: Request) -> Response:
+            """Post some data."""
+
             extra_fields = self._return_extra_fields_in_data(request.data)
             if len(extra_fields) > 0:
                 DATA = {"Some extra fields were passed:": extra_fields}

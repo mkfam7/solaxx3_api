@@ -1,6 +1,11 @@
 from django.urls import path
 
-from .views import *
+from .views import (
+    GetUpdateLastDayStats,
+    GetUpdateLastMinuteStats,
+    ListAddDailyStats,
+    ListAddMinuteStats,
+)
 
 urlpatterns = [
     path("minute-stats/", ListAddMinuteStats.as_view(), name="minute_stats"),

@@ -4,7 +4,7 @@ from .serializers import *
 ListAddMinuteStats, GetUpdateLastMinuteStats = create_views(
     upload_date_column="upload_time",
     model_serializer=MinuteStatsSerializer,
-    last_model_serializer=LastMinuteStatsSerializer,
+    last_record_model_serializer=LastMinuteStatsSerializer,
     docs=[
         {
             "get": "Get minute stats.",
@@ -20,7 +20,7 @@ ListAddMinuteStats, GetUpdateLastMinuteStats = create_views(
 ListAddDailyStats, GetUpdateLastDayStats = create_views(
     upload_date_column="upload_date",
     model_serializer=DailyStatsSerializer,
-    last_model_serializer=LastDayStatsSerializer,
+    last_record_model_serializer=LastDayStatsSerializer,
     docs=[
         {
             "get": "Get daily stats.",

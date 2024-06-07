@@ -1,7 +1,11 @@
+"""All the models of this app."""
+
 from django.db import models
 
 
 class MinuteStatsRecord(models.Model):
+    """Represents every-minute inverter data."""
+
     upload_time = models.DateTimeField(primary_key=True)
     inverter_status = models.PositiveSmallIntegerField(default=0)
     grid_voltage_r = models.PositiveSmallIntegerField(null=True)
@@ -32,6 +36,8 @@ class MinuteStatsRecord(models.Model):
 
 
 class LastMinuteStatsRecord(models.Model):
+    """Represents every-minute inverter data."""
+
     upload_time = models.DateTimeField()
     inverter_status = models.PositiveSmallIntegerField(default=0)
     grid_voltage_r = models.PositiveSmallIntegerField(null=True)
@@ -62,6 +68,8 @@ class LastMinuteStatsRecord(models.Model):
 
 
 class DailyStatsRecord(models.Model):
+    """Represents daily inverter data."""
+
     upload_date = models.DateField(primary_key=True)
     feed_in_energy_today_meter = models.FloatField(max_length=7, null=True)
     energy_to_grid_today_quantity = models.FloatField(max_length=7, null=True)
@@ -71,6 +79,8 @@ class DailyStatsRecord(models.Model):
 
 
 class LastDayStatsRecord(models.Model):
+    """Represents daily inverter data."""
+
     upload_date = models.DateField()
     feed_in_energy_today_meter = models.FloatField(max_length=7, null=True)
     energy_to_grid_today_quantity = models.FloatField(max_length=7, null=True)

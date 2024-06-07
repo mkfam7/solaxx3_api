@@ -133,6 +133,23 @@ class AddHistoryStatsTests(APITestCase):
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
         self.assertEqual(DailyStatsRecord.objects.count(), 1)
 
+    def test_invalid_force_parameter(self):
+        """Test posting data with an invalid `force` parameter."""
+
+        self.client.force_login(self.testuser)
+
+        data = {"detail": "'force' parameter must be either 'true' or 'false'"}
+
+        url = reverse_lazy("daily_stats", current_app="solax_registers")
+        self.client.post(url, data=data, format="json")
+        response = self.client.post(
+            url, data=data, format="json", QUERY_STRING="force=x"
+        )
+
+        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.json(), data)
+        self.assertEqual(DailyStatsRecord.objects.count(), 0)
+
 
 class GetHistoryStatsTests(APITestCase):
     """Tests for getting history stats."""
