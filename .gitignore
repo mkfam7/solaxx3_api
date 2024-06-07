@@ -1,3 +1,6 @@
+# Custom
+.env
+
 # Django
 *.log
 *.pot
