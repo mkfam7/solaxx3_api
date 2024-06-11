@@ -354,7 +354,7 @@ def create_views(
 
         def _truncate(self, args: list) -> Response:
             no_deleted, _ = self.model.objects.all().delete()
-            return Response({"deleted": no_deleted})
+            return Response({"deleted": no_deleted}, status.HTTP_204_NO_CONTENT)
 
     class GetUpdateLastStats(generics.ListCreateAPIView):
         """Actions for the last record view."""
