@@ -2,7 +2,12 @@
 
 from django.contrib.auth import get_user_model
 from django.urls import reverse_lazy
-from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST
+from rest_framework.status import (
+    HTTP_200_OK,
+    HTTP_201_CREATED,
+    HTTP_204_NO_CONTENT,
+    HTTP_400_BAD_REQUEST,
+)
 from rest_framework.test import APITestCase
 
 from .models import DailyStatsRecord, LastDayStatsRecord
@@ -340,7 +345,7 @@ class DeleteHistoryStatsTests(APITestCase):
         response = self.client.delete(
             reverse_lazy("daily_stats"), QUERY_STRING="mode=truncate"
         )
-        self.assertEqual(response.status_code, HTTP_200_OK)
+        self.assertEqual(response.status_code, HTTP_204_NO_CONTENT)
         self.assertEqual(response.json(), result)
 
     def test_delete_older_than_date(self):
