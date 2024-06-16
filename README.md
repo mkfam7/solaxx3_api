@@ -17,13 +17,18 @@ This API stores data from the inverter. It supports multiple users with permissi
     pip3 install -r requirements.txt
     ```
 
-2. To create the table schemas, run the following in the project directory:
+2. For encrypting passwords and other data, generate a secret key using the following command:
+    ```bash
+    echo "SECRET_KEY=$(python3 -c 'import secrets; print(secrets.token_urlsafe())')" > .env
+    ```
+
+3. To create the table schemas, run the following in the project directory:
 
     ```bash
     python3 manage.py migrate
     ```
 
-3. To be able to authenticate in API requests, create a superuser (user that has all permissions):
+4. To be able to authenticate in API requests, create a superuser (user that has all permissions):
 
     ```bash
     python3 manage.py createsuperuser
@@ -38,7 +43,7 @@ This API stores data from the inverter. It supports multiple users with permissi
 
     By default, `USERNAME` is `admin`.
 
-4. To ensure proper handling of templates and static files, run the following command:
+5. To ensure proper handling of templates and static files, run the following command:
 
    ```bash
    python3 manage.py collectstatic
