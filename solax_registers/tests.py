@@ -1,15 +1,29 @@
 """File of API tests."""
 
+from pathlib import Path
+import sys
+
+env_path = Path(__file__).resolve().parent.parent / ".env"
+
+if not env_path.exists():
+    with open(str(env_path), "w", encoding="utf-8") as f:
+        f.write("SECRET_KEY=your_key")
+
 from django.contrib.auth import get_user_model
+from django.test import override_settings
 from django.urls import reverse_lazy
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST
 from rest_framework.test import APITestCase
 
 from .models import DailyStatsRecord, LastDayStatsRecord
 
+
 User = get_user_model()
 
 
+@override_settings(
+    SECRET_KEY="django-insecure-o$ax$#*gng6qi*j#&9lwof070#f=v^7e9ck)_70@t60kppj&hz"
+)
 class AddHistoryStatsTests(APITestCase):
     """Tests for adding history stats."""
 
@@ -151,6 +165,9 @@ class AddHistoryStatsTests(APITestCase):
         self.assertEqual(DailyStatsRecord.objects.count(), 0)
 
 
+@override_settings(
+    SECRET_KEY="django-insecure-o$ax$#*gng6qi*j#&9lwof070#f=v^7e9ck)_70@t60kppj&hz"
+)
 class GetHistoryStatsTests(APITestCase):
     """Tests for getting history stats."""
 
@@ -289,6 +306,9 @@ class GetHistoryStatsTests(APITestCase):
         self.assertListEqual(response.json(), result)
 
 
+@override_settings(
+    SECRET_KEY="django-insecure-o$ax$#*gng6qi*j#&9lwof070#f=v^7e9ck)_70@t60kppj&hz"
+)
 class DeleteHistoryStatsTests(APITestCase):
     """Tests to test deleting history tests."""
 
@@ -369,6 +389,9 @@ class DeleteHistoryStatsTests(APITestCase):
         self.assertEqual(response.json(), result)
 
 
+@override_settings(
+    SECRET_KEY="django-insecure-o$ax$#*gng6qi*j#&9lwof070#f=v^7e9ck)_70@t60kppj&hz"
+)
 class AddLastHistoryStatsTests(APITestCase):
     """Tests for adding last history stats."""
 
@@ -450,6 +473,9 @@ class AddLastHistoryStatsTests(APITestCase):
         self.assertListEqual(sorted(extra_fields), ["extra_field"])
 
 
+@override_settings(
+    SECRET_KEY="django-insecure-o$ax$#*gng6qi*j#&9lwof070#f=v^7e9ck)_70@t60kppj&hz"
+)
 class GetLastHistoryStatsTests(APITestCase):
     """Tests for getting last history stats."""
 
