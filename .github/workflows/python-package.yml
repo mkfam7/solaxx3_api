@@ -33,5 +33,5 @@ jobs:
         echo "SECRET_KEY=123" > .env
     - name: Run all tests
       run: |
-        python3 manage.py test -v 3 >> "$GITHUB_OUTPUT"
+        python3 manage.py test
 
