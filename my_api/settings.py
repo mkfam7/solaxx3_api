@@ -24,8 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 env = Env()
 env_path = Path(__file__).resolve().parent.parent / ".env"
-env.read_env(recurse=True, path=str(env_path), verbose=True)
-print(__debug__)
+env.read_env(str(env_path), False)
 SECRET_KEY = env.str("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!

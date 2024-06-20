@@ -1,14 +1,5 @@
 """File of API tests."""
 
-from pathlib import Path
-import sys
-
-env_path = Path(__file__).resolve().parent.parent / ".env"
-
-if not env_path.exists():
-    with open(str(env_path), "w", encoding="utf-8") as f:
-        f.write("SECRET_KEY=your_key")
-
 from django.contrib.auth import get_user_model
 from django.test import override_settings
 from django.urls import reverse_lazy
