@@ -19,7 +19,7 @@ This API stores data from the inverter. It supports multiple users with permissi
 
 2. For encrypting passwords and other data, generate a secret key using the following command:
     ```bash
-    echo "SECRET_KEY=$(python3 -c 'import secrets; print(secrets.token_urlsafe())')" > .env
+    echo "SECRET_KEY=$(openssl rand -base64 100)" > .env
     ```
 
 3. To create the table schemas, run the following in the project directory:
