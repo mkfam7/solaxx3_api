@@ -155,7 +155,7 @@ def create_views(
     POST_PARAMETERS = [OVERWRITE_PARAM]
 
     MODE_PARAM = OpenApiParameter(
-        name="mode",
+        name="action",
         enum=["delete_older_than", "truncate"],
         location="query",
         required=True,
@@ -168,7 +168,7 @@ def create_views(
                 value="delete_older_than",
                 summary="Using delete_older_than",
                 description="Use delete_older_than to delete records"
-                " older than X date.",
+                " older than the given date.",
             ),
             OpenApiExample(
                 name="Ex. 2",
@@ -326,18 +326,18 @@ def create_views(
                 "delete_older_than": self._delete_older_than_date,
                 "truncate": self._truncate,
             }
-            mode = request.query_params.get("mode")
+            action = request.query_params.get("action")
             args = request.query_params.getlist("args")
 
-            if not mode:
-                MESSAGE = "Non-null query parameter 'mode' is mandatory."
+            if not action:
+                MESSAGE = "Non-null query parameter 'action' is mandatory."
                 return Response({"detail": MESSAGE}, status.HTTP_400_BAD_REQUEST)
 
-            if mode not in MODE_ACTION_MAPPING:
-                MESSAGE = "Query parameter 'mode' is not among valid modes."
+            if action not in MODE_ACTION_MAPPING:
+                MESSAGE = "Query parameter 'action' is not among valid actions."
                 return Response({"detail": MESSAGE}, status.HTTP_400_BAD_REQUEST)
 
-            return MODE_ACTION_MAPPING[mode](args)
+            return MODE_ACTION_MAPPING[action](args)
 
         def _delete_older_than_date(self, args: list) -> Response:
             if args == []:

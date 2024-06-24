@@ -112,8 +112,8 @@ REST_FRAMEWORK = {
 }
 
 SPECTACULAR_SETTINGS = {
-    "TITLE": "Solax API",
-    "DESCRIPTION": "An API storing and retrieving data from various sources.",
-    "VERSION": "0.1.2",
+    "TITLE": "SolaxX3 API",
+    "DESCRIPTION": "An API storing and retrieving data from a SolaxX3 inverter.",
+    "VERSION": "0.1.3",
     "SERVE_INCLUDE_SCHEMA": False,
 }
