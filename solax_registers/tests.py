@@ -320,24 +320,24 @@ class DeleteHistoryStatsTests(APITestCase):
         DailyStatsRecord(upload_date="2021-01-01").save()
         DailyStatsRecord(upload_date="2022-01-01").save()
 
-    def test_deleting_with_no_mode(self):
-        """Try to delete data without passing the `mode` parameter."""
+    def test_deleting_with_no_action(self):
+        """Try to delete data without passing the `action` parameter."""
 
         self.client.force_login(user=self.testuser)
-        result = {"detail": "Non-null query parameter 'mode' is mandatory."}
+        result = {"detail": "Non-null query parameter 'action' is mandatory."}
 
         response = self.client.delete(reverse_lazy("daily_stats"))
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json(), result)
 
-    def test_deleting_with_nonexistent_mode(self):
-        """Try to delete data with passing an invalid `mode` parameter."""
+    def test_deleting_with_nonexistent_action(self):
+        """Try to delete data with passing an invalid `action` parameter."""
 
         self.client.force_login(user=self.testuser)
-        result = {"detail": "Query parameter 'mode' is not among valid modes."}
+        result = {"detail": "Query parameter 'action' is not among valid actions."}
 
         response = self.client.delete(
-            reverse_lazy("daily_stats"), QUERY_STRING="mode=x"
+            reverse_lazy("daily_stats"), QUERY_STRING="action=x"
         )
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json(), result)
@@ -349,7 +349,7 @@ class DeleteHistoryStatsTests(APITestCase):
         result = {"deleted": 3}
 
         response = self.client.delete(
-            reverse_lazy("daily_stats"), QUERY_STRING="mode=truncate"
+            reverse_lazy("daily_stats"), QUERY_STRING="action=truncate"
         )
         self.assertEqual(response.status_code, HTTP_200_OK)
         self.assertEqual(response.json(), result)
@@ -362,7 +362,7 @@ class DeleteHistoryStatsTests(APITestCase):
 
         response = self.client.delete(
             reverse_lazy("daily_stats"),
-            QUERY_STRING="mode=delete_older_than&args=2021-01-01",
+            QUERY_STRING="action=delete_older_than&args=2021-01-01",
         )
         self.assertEqual(response.status_code, HTTP_200_OK)
         self.assertEqual(response.json(), result)
@@ -374,7 +374,7 @@ class DeleteHistoryStatsTests(APITestCase):
         result = {"detail": "Argument 'date' in 'args' (0) is mandatory."}
 
         response = self.client.delete(
-            reverse_lazy("daily_stats"), QUERY_STRING="mode=delete_older_than"
+            reverse_lazy("daily_stats"), QUERY_STRING="action=delete_older_than"
         )
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json(), result)

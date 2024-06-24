@@ -326,18 +326,18 @@ def create_views(
                 "delete_older_than": self._delete_older_than_date,
                 "truncate": self._truncate,
             }
-            mode = request.query_params.get("action")
+            action = request.query_params.get("action")
             args = request.query_params.getlist("args")
 
-            if not mode:
+            if not action:
                 MESSAGE = "Non-null query parameter 'action' is mandatory."
                 return Response({"detail": MESSAGE}, status.HTTP_400_BAD_REQUEST)
 
-            if mode not in MODE_ACTION_MAPPING:
-                MESSAGE = "Query parameter 'action' is not among valid modes."
+            if action not in MODE_ACTION_MAPPING:
+                MESSAGE = "Query parameter 'action' is not among valid actions."
                 return Response({"detail": MESSAGE}, status.HTTP_400_BAD_REQUEST)
 
-            return MODE_ACTION_MAPPING[mode](args)
+            return MODE_ACTION_MAPPING[action](args)
 
         def _delete_older_than_date(self, args: list) -> Response:
             if args == []:
