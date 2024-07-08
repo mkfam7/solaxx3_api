@@ -74,11 +74,7 @@ def create_views(
 
     SINCE_PARAM = OpenApiParameter(
         name="since",
-        type=(
-            OpenApiTypes.DATETIME
-            if upload_date_column.endswith("time")
-            else OpenApiTypes.DATE
-        ),
+        type=(OpenApiTypes.DATETIME if upload_date_column.endswith("time") else OpenApiTypes.DATE),
         location="query",
         required=False,
         description="First date in filter range. Optional.",
@@ -102,11 +98,7 @@ def create_views(
 
     BEFORE_PARAM = OpenApiParameter(
         name="before",
-        type=(
-            OpenApiTypes.DATETIME
-            if upload_date_column.endswith("time")
-            else OpenApiTypes.DATE
-        ),
+        type=(OpenApiTypes.DATETIME if upload_date_column.endswith("time") else OpenApiTypes.DATE),
         location="query",
         required=False,
         description="Second date in filter range. Optional.",
@@ -135,26 +127,21 @@ def create_views(
         location="query",
         required=False,
         description=(
-            "Pass 'force' to the query string to overwrite the record"
-            " in the database, even though it exists."
+            "Pass 'force' to the query string to overwrite the record" " in the database, even though it exists."
         ),
         style="form",
         explode=True,
     )
 
-    MISSING_STATS = Response(
-        {"detail": "Query parameter 'stats' is mandatory."}, status.HTTP_400_BAD_REQUEST
-    )
+    MISSING_STATS = Response({"detail": "Query parameter 'stats' is mandatory."}, status.HTTP_400_BAD_REQUEST)
 
-    extra_fields_passed = lambda f: Response(
-        {"Some extra fields were passed:": f}, status.HTTP_400_BAD_REQUEST
-    )
+    extra_fields_passed = lambda f: Response({"Some extra fields were passed:": f}, status.HTTP_400_BAD_REQUEST)
 
     GET_PARAMETERS = [STATS_PARAM, SINCE_PARAM, BEFORE_PARAM]
 
     POST_PARAMETERS = [OVERWRITE_PARAM]
 
-    MODE_PARAM = OpenApiParameter(
+    ACTION_PARAM = OpenApiParameter(
         name="action",
         enum=["delete_older_than", "truncate"],
         location="query",
@@ -167,8 +154,7 @@ def create_views(
                 name="Ex. 1",
                 value="delete_older_than",
                 summary="Using delete_older_than",
-                description="Use delete_older_than to delete records"
-                " older than the given date.",
+                description="Use delete_older_than to delete records" " older than the given date.",
             ),
             OpenApiExample(
                 name="Ex. 2",
@@ -183,12 +169,12 @@ def create_views(
         name="args",
         many=True,
         location="query",
-        description="Parameter selecting which delete action to make.",
+        description="Parameter supplying parameters for a delete action.",
         style="form",
         explode=True,
     )
 
-    DELETE_PARAMS = [MODE_PARAM, ARGS_PARAM]
+    DELETE_PARAMS = [ACTION_PARAM, ARGS_PARAM]
 
     class ListAddDeleteStats(generics.ListCreateAPIView):
         serializer_class = model_serializer
@@ -229,23 +215,17 @@ def create_views(
             model_fields = self._get_model_fields()
             return set_subtract(fields, model_fields)
 
-        def _get_filtered_data(
-            self, stats: list, filter_range: list
-        ) -> Type[ModelSerializer]:
+        def _get_filtered_data(self, stats: list, filter_range: list) -> Type[ModelSerializer]:
             since, before = filter_range
 
             if self._must_not_return_all_stats(stats):
-                queryset = self.model.objects.filter(
-                    **self._construct_filter_params(since, before)
-                ).values(*stats)
+                queryset = self.model.objects.filter(**self._construct_filter_params(since, before)).values(*stats)
 
             else:
                 if self._is_no_timerange_specified(since, before):
                     queryset = self.model.objects.all().values()
                 else:
-                    queryset = self.model.objects.filter(
-                        **self._construct_filter_params(since, before)
-                    ).values()
+                    queryset = self.model.objects.filter(**self._construct_filter_params(since, before)).values()
 
             serializer = self.serializer_class(queryset, many=True)
             return serializer
@@ -253,14 +233,10 @@ def create_views(
         def _must_not_return_all_stats(self, stats: list) -> bool:
             return stats != ["all"]
 
-        def _is_no_timerange_specified(
-            self, since: Union[str, None], before: Union[str, None]
-        ) -> bool:
+        def _is_no_timerange_specified(self, since: Union[str, None], before: Union[str, None]) -> bool:
             return (since, before) == (None, None)
 
-        def _construct_filter_params(
-            self, since: Union[str, None], before: Union[str, None]
-        ) -> Dict[str, str]:
+        def _construct_filter_params(self, since: Union[str, None], before: Union[str, None]) -> Dict[str, str]:
             filter_params = {}
             if since is not None:
                 filter_params[f"{upload_date_column}__gte"] = since
