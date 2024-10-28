@@ -1,126 +1,173 @@
-# Data API
+# Rest API gateway for Solax Inverter
 
-**Warning:** *This API is not suitable for production. It is meant for home use.* It implements some basic securities, including basic authentication and session authentication. However, it does not completely support CSRF.
+## Overview
+This application implements a Rest API Gateway that manages the data retrieved from a solar inverter.
+
+> This module was tested together with the [solaxx3](https://github.com/mkfam7/solaxx3) module which performed the data retrieval from the solar inverter.
+
+## Prerequisites
+- django 4.2+
+- python 3.10+
+- openssl
+- bash
+
 
 Project link: [https://github.com/mkfam7/solaxx3_api][project_link]
 
 [project_link]: https://github.com/mkfam7/solaxx3_api
 
+## Installation
 
-This API stores data from the inverter. It supports multiple users with permissions to only one set of data. It currently uses an SQLite database but can be configured otherwise.
+Run the initial setup:
 
-## Prerequisites
+```bash
+bash setup.sh
+```
 
-1. First of all, install the requirements.
+During the setup, the user will be prompted for:
+- **username** - the admin username
+- **password** - the password of the admin user
+- **email** - the email where the admin notifications should be sent
 
-    ```bash
-    pip3 install -r requirements.txt
-    ```
-
-2. For encryption, generate a secret key using the following command:
-    ```bash
-    echo "SECRET_KEY=$(openssl rand -base64 100)" > .env
-    ```
-
-3. Create the table schemas, by running the following command:
-
-    ```bash
-    python3 manage.py migrate
-    ```
-
-4. To be able to authenticate in API requests, create a superuser (user that has all permissions):
-
-    ```bash
-    python3 manage.py createsuperuser
-    ```
-
-    You will be asked for a username, an optional email, and a password.  
-    In case you forgot your password, use this syntax to change it:
-
-    ```bash
-    python3 manage.py changepassword [USERNAME]
-    ```
-
-    By default, `USERNAME` is `admin`.
-
-5. To ensure proper handling of templates and static files, run the following command:
-
-   ```bash
-   python3 manage.py collectstatic
-   ```
+The password can be changed using the following command:
+```bash
+python3 manage.py changepassword [USERNAME]
+```
 
 ## Usage
 
-### Starting/stopping the server
+### Start the application
+   ```bash
+   bash start.sh
+   ```
+   or
+   ```bash
+   bash start.sh HOSTNAME PORT
+   ```
 
-To start the server, run the following:
+   > **HOSTNAME** - the IP Address or the Hostname of the server where the application is hosted.  
+   > **PORT** - the port on which the application is available.
 
-```bash
-python3 manage.py runserver [TARGET]
-```
+   If the application was started without parameters, it will become available at http://localhost:8000. Otherwise, it will become available at the location specified by the parameters.
 
-`TARGET` is the place where to run the server; the default is `localhost:8000` or `127.0.0.1:8000`. If one omits the port from `TARGET`, it defaults to `8000`.
+---
+### Stop the application  
+Press `Ctrl-C`.
 
-To stop the server, press `Ctrl-C`.
+---
+### Rest API application  
+#### Administration
 
-### The admin section
+  For administrative tasks, Django provides a useful web application at `http://host:port/admin.`
 
-For administrative tasks, Django has provided a useful web application. To access this application, navigate to `/admin` endpoint.
+#### Documentation
+The Swagger documentation can be found at `http://host:port/swagger-docs/`  
 
-### API Documentation
+---
+### Rest API
+#### Historical data endpoints
+#####  `/minute-stats/` : all historical data with minute granularity
 
-This API has provided a Swagger documentation for API endpoints. To access it, go to `/swagger-docs/` endpoint.
-
-### Functionality
-
-The API is divided into two groups: every-minute data and every-day data. Each category has two endpoints. One works with all data stored and is called the history endpoint, and the other works with one record that represents the last record inserted and is called the last record endpoint.
-
-### History endpoints
-
-#### GET
-All GET behavior is manipulated through query parameters. These are the available parameters:
-
-- `stats`  
-This parameter is mandatory and represents which fields to return. Use the word `all` to represent all fields.  
-Examples:  
-    - `/solax/minute-stats/?stats=all`
-    - `/solax/minute-stats/?stats=upload_time&stats=grid_voltage_t`
-
-- `before` (optional)  
-This parameter is used to filter data with an `upload_time` less than or equal to the given date. This may be combined with the `since` parameter.
-
-- `since` (optional)  
-This parameter is used to filter data with an `upload_time` greater than or equal to the given date. This may be combined with the `before` parameter. To return all data, do not specify the `before` and `since` parameters.  
-Examples:  
-    - `solax/minute-stats/?stats=all&before=2020-01-01&after=1970-05-29`
-    - `solax/minute-stats/?stats=all&after=1970-05-29`
-    - `solax/minute-stats/?stats=all&before=2020-01-01`
-    - `solax/minute-stats/?stats=all`
-
-#### POST
-POST requests have both a request body and an optional query parameter.
-
-The request body is the record to insert. The API will not add the record if any fields are missing or invalid.
-
-The optional query parameter `force`, which can be either `true` or `false`, is used to specify whether the API should stop if a record with an existing upload time exists in the database. If the value is `true`, it overwrites the existing record. If this parameter is not specified, the default is `false`.
-
-#### DELETE
-
-Delete requests have only query parameters to control the functionality. The query parameters are as follows:
-
-- `actopm`  
-This parameter controls what action to make. If the value is `truncate`, it will delete all data managed by the endpoint. If the value is `delete_older_than`, it will delete all data older than or equal to a given date.
-
-- `args` (optional)  
-The parameters which are given to various delete actions. No parameters are needed for `truncate` action. For action `delete_older_than`, a date must be given to filter and delete the data.  
 Examples:
-    - `solax/minute-stats/?action=truncate`
-    - `solax/minute-stats/?action=delete_older_than&args=1999-11-31`
 
-### Last record endpoints
+1. Retrieve all historical data for the `grid_voltage_t`  
+    [GET] `/solax/minute-stats/?stats=upload_time&stats=grid_voltage_t`
 
-The last record endpoints support many of the same operations as [history endpoints](#history-endpoints) except for the following:
+2. Retrieve all historical data for the `grid_voltage_r` and `grid_voltage_t`  
+    [GET] `/solax/minute-stats/?stats=upload_time&stats=grid_voltage_r&stats=grid_voltage_t`
 
-- `DELETE` operations are not permitted.
-- `GET` query parameters `since` and `before` are removed.
-- `POST` query parameter `force` is removed; it will always have the value of `true`
+3. Query all available fields  
+    [GET] `/solax/minute-stats/?stats=all`
+
+4. Query all available fields before 2020-01-03  
+    [GET] `/solax/minute-stats/?stats=all&before=2020-01-02`
+
+5. Query all available fields after 2020-01-01  
+    [GET] `/solax/minute-stats/?stats=all&after=2020-01-02`
+
+6. Query all available fields between 2019-04-01 and 2020-09-30  
+    [GET] `/solax/minute-stats/?stats=all&after=2019-04-01&before=2020-09-30`
+
+7. Insert a record (if no record with the given time exists)  
+    [POST] `/solax/minute-stats/`
+
+8. Insert a record with overwrite  
+    [POST] `/solax/minute-stats/?force=true`
+
+9. Delete all data managed by `minute-stats`  
+    [DELETE] `/solax/minute-stats/?action=truncate`
+
+10. Delete all data managed by `minute-stats` older than 2020-01-01  
+    [DELETE] `/solax/minute-stats/?action=delete_older_than&args=2019-12-31`
+
+---
+##### `/daily-stats/`: historical data aggregated by day
+
+Examples:
+
+1. Retrieve all historical data for the `grid_voltage_t`  
+    [GET] `/solax/daily-stats/?stats=upload_time&stats=grid_voltage_t`
+
+2. Retrieve all historical data for the `grid_voltage_r` and `grid_voltage_t`  
+    [GET] `/solax/daily-stats/?stats=upload_time&stats=grid_voltage_r&stats=grid_voltage_t`
+
+3. Query all available fields  
+    [GET] `/solax/daily-stats/?stats=all`
+
+4. Query all available fields before 2020-01-03  
+    [GET] `/solax/daily-stats/?stats=all&before=2020-01-02`
+
+5. Query all available fields after 2020-01-01  
+    [GET] `/solax/daily-stats/?stats=all&after=2020-01-02`
+
+6. Query all available fields between 2019-04-01 and 2020-09-30  
+    [GET] `/solax/daily-stats/?stats=all&after=2019-04-01&before=2020-09-30`
+
+7. Insert a record (if no record with the given time exists)  
+    [POST] `/solax/daily-stats/`
+
+8. Insert a record with overwrite  
+    [POST] `/solax/daily-stats/?force=true`
+
+9. Delete all data managed by `daily-stats`  
+    [DELETE] `/solax/daily-stats/?action=truncate`
+
+10. Delete all data managed by `daily-stats` older than 2020-01-01  
+    [DELETE] `/solax/daily-stats/?action=delete_older_than&args=2019-12-31`
+
+---
+#### Latest data endpoints
+##### `/last-minute-stats/`: the most recent retrieved stats  
+
+Examples:
+1. Retrieve the last record for the `grid_voltage_t`  
+    [GET] `/solax/last-minute-stats/?stats=upload_time&stats=grid_voltage_t`
+
+2. Retrieve the last record for the `grid_voltage_r` and `grid_voltage_t`  
+    [GET] `/solax/last-minute-stats/?stats=upload_time&stats=grid_voltage_r&stats=grid_voltage_t`
+
+3. Query all available fields  
+    [GET] `/solax/last-minute-stats/?stats=all`
+
+4. Insert a record
+    [POST] `solax/last-minute-stats/`
+
+---
+##### `/last-day-stats/` : the most recent retrieved stats aggregated by day (so far)
+
+Examples:
+1. Retrieve the last record for the `grid_voltage_t`  
+    [GET] `/solax/last-day-stats/?stats=upload_time&stats=grid_voltage_t`
+
+2. Retrieve the last record for the `grid_voltage_r` and `grid_voltage_t`  
+    [GET] `/solax/last-day-stats/?stats=upload_time&stats=grid_voltage_r&stats=grid_voltage_t`
+
+3. Query all available fields  
+    [GET] `/solax/last-day-stats/?stats=all`
+
+4. Insert a record
+    [POST] `solax/last-day-stats/`
+
+## Django configuration considerations
+
+The application supports multiple users who can operate over the same set of data. The current implementation uses SQLite as a database.
