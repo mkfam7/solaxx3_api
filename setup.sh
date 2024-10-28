@@ -7,7 +7,8 @@ PIP=pip3
 ${PIP} install -r requirements.txt || exit 1
 
 # Generate a Django secret key
-echo "SECRET_KEY=$(openssl rand -base64 100)" > .env
+echo "export SECRET_KEY=$(openssl rand -base64 100)" > .env
+source .env
 
 # Create table schemas
 ${PYTHON} manage.py makemigrations solax_registers || exit 1
@@ -31,4 +32,4 @@ export DJANGO_SUPERUSER_USERNAME DJANGO_SUPERUSER_EMAIL DJANGO_SUPERUSER_PASSWOR
 ${PYTHON} manage.py createsuperuser --email "${DJANGO_SUPERUSER_EMAIL:-test@example.com}" --no-input || exit 1
 
 # Collect the Django static files
-${PYTHON} manage.py collectstatic || exit 1
+${PYTHON} manage.py collectstatic

@@ -61,7 +61,7 @@ Press `Ctrl-C`.
   For administrative tasks, Django provides a useful web application at `http://host:port/admin.`
 
 #### Documentation
-The Swagger documentation can be found at `http://host:port/swagger-docs/`  
+The Swagger documentation can be found at `http://host:port/swagger-docs/`
 
 ---
 ### Rest API
@@ -71,28 +71,28 @@ The Swagger documentation can be found at `http://host:port/swagger-docs/`
 Examples:
 
 1. Retrieve all historical data for the `grid_voltage_t`  
-    [GET] `/solax/minute-stats/?stats=upload_time&stats=grid_voltage_t`
+    [GET] `/solax/minute-stats/?fields=upload_time&fields=grid_voltage_t`
 
 2. Retrieve all historical data for the `grid_voltage_r` and `grid_voltage_t`  
-    [GET] `/solax/minute-stats/?stats=upload_time&stats=grid_voltage_r&stats=grid_voltage_t`
+    [GET] `/solax/minute-stats/?fields=upload_time&fields=grid_voltage_r&fields=grid_voltage_t`
 
 3. Query all available fields  
-    [GET] `/solax/minute-stats/?stats=all`
+    [GET] `/solax/minute-stats/?fields=all`
 
 4. Query all available fields before 2020-01-03  
-    [GET] `/solax/minute-stats/?stats=all&before=2020-01-02`
+    [GET] `/solax/minute-stats/?fields=all&before=2020-01-02`
 
 5. Query all available fields after 2020-01-01  
-    [GET] `/solax/minute-stats/?stats=all&after=2020-01-02`
+    [GET] `/solax/minute-stats/?fields=all&since=2020-01-02`
 
 6. Query all available fields between 2019-04-01 and 2020-09-30  
-    [GET] `/solax/minute-stats/?stats=all&after=2019-04-01&before=2020-09-30`
+    [GET] `/solax/minute-stats/?fields=all&since=2019-04-01&before=2020-09-30`
 
 7. Insert a record (if no record with the given time exists)  
     [POST] `/solax/minute-stats/`
 
 8. Insert a record with overwrite  
-    [POST] `/solax/minute-stats/?force=true`
+    [POST] `/solax/minute-stats/?overwrite=true`
 
 9. Delete all data managed by `minute-stats`  
     [DELETE] `/solax/minute-stats/?action=truncate`
@@ -106,28 +106,28 @@ Examples:
 Examples:
 
 1. Retrieve all historical data for the `grid_voltage_t`  
-    [GET] `/solax/daily-stats/?stats=upload_time&stats=grid_voltage_t`
+    [GET] `/solax/daily-stats/?fields=upload_time&fields=grid_voltage_t`
 
 2. Retrieve all historical data for the `grid_voltage_r` and `grid_voltage_t`  
-    [GET] `/solax/daily-stats/?stats=upload_time&stats=grid_voltage_r&stats=grid_voltage_t`
+    [GET] `/solax/daily-stats/?fields=upload_time&fields=grid_voltage_r&fields=grid_voltage_t`
 
 3. Query all available fields  
-    [GET] `/solax/daily-stats/?stats=all`
+    [GET] `/solax/daily-stats/?fields=all`
 
 4. Query all available fields before 2020-01-03  
-    [GET] `/solax/daily-stats/?stats=all&before=2020-01-02`
+    [GET] `/solax/daily-stats/?fields=all&before=2020-01-02`
 
 5. Query all available fields after 2020-01-01  
-    [GET] `/solax/daily-stats/?stats=all&after=2020-01-02`
+    [GET] `/solax/daily-stats/?fields=all&since=2020-01-02`
 
 6. Query all available fields between 2019-04-01 and 2020-09-30  
-    [GET] `/solax/daily-stats/?stats=all&after=2019-04-01&before=2020-09-30`
+    [GET] `/solax/daily-stats/?fields=all&since=2019-04-01&before=2020-09-30`
 
 7. Insert a record (if no record with the given time exists)  
     [POST] `/solax/daily-stats/`
 
 8. Insert a record with overwrite  
-    [POST] `/solax/daily-stats/?force=true`
+    [POST] `/solax/daily-stats/?overwrite=true`
 
 9. Delete all data managed by `daily-stats`  
     [DELETE] `/solax/daily-stats/?action=truncate`
@@ -141,13 +141,13 @@ Examples:
 
 Examples:
 1. Retrieve the last record for the `grid_voltage_t`  
-    [GET] `/solax/last-minute-stats/?stats=upload_time&stats=grid_voltage_t`
+    [GET] `/solax/last-minute-stats/?fields=upload_time&fields=grid_voltage_t`
 
 2. Retrieve the last record for the `grid_voltage_r` and `grid_voltage_t`  
-    [GET] `/solax/last-minute-stats/?stats=upload_time&stats=grid_voltage_r&stats=grid_voltage_t`
+    [GET] `/solax/last-minute-stats/?fields=upload_time&fields=grid_voltage_r&fields=grid_voltage_t`
 
 3. Query all available fields  
-    [GET] `/solax/last-minute-stats/?stats=all`
+    [GET] `/solax/last-minute-stats/?fields=all`
 
 4. Insert a record
     [POST] `solax/last-minute-stats/`
@@ -157,13 +157,13 @@ Examples:
 
 Examples:
 1. Retrieve the last record for the `grid_voltage_t`  
-    [GET] `/solax/last-day-stats/?stats=upload_time&stats=grid_voltage_t`
+    [GET] `/solax/last-day-stats/?fields=upload_time&fields=grid_voltage_t`
 
 2. Retrieve the last record for the `grid_voltage_r` and `grid_voltage_t`  
-    [GET] `/solax/last-day-stats/?stats=upload_time&stats=grid_voltage_r&stats=grid_voltage_t`
+    [GET] `/solax/last-day-stats/?fields=upload_time&fields=grid_voltage_r&fields=grid_voltage_t`
 
 3. Query all available fields  
-    [GET] `/solax/last-day-stats/?stats=all`
+    [GET] `/solax/last-day-stats/?fields=all`
 
 4. Insert a record
     [POST] `solax/last-day-stats/`
