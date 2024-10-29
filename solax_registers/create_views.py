@@ -64,16 +64,16 @@ def create_views(
             since = query_parameters.get("since")
             before = query_parameters.get("before")
             filter_range = (since, before)
-            stats = query_parameters.getlist("stats")
+            fields = query_parameters.getlist("fields")
 
-            extra_fields = self._return_extra_fields(stats)
-            if len(stats) == 0:
-                return error.MISSING_STATS
+            extra_fields = self._return_extra_fields(fields)
+            if len(fields) == 0:
+                return error.MISSING_FIELDS
 
-            if stats != ["all"] and extra_fields:
+            if fields != ["all"] and extra_fields:
                 return error.extra_fields_passed(extra_fields)
 
-            serializer = self._get_filtered_data(stats, filter_range)
+            serializer = self._get_filtered_data(fields, filter_range)
             return Response(list(serializer.instance), status.HTTP_200_OK)
 
         def _return_extra_fields(self, fields: list) -> list:
@@ -134,7 +134,7 @@ def create_views(
         def post(self, request: Request) -> Response:
             """Add some data."""
 
-            force_create = request.query_params.get("force", "false")
+            force_create = request.query_params.get("overwrite", "false")
             if not self._is_force_create_valid(force_create):
                 return error.INVALID_FORCE_PARAM
 
@@ -224,16 +224,16 @@ def create_views(
             """Get some data."""
 
             query_params = request.query_params
-            stats = query_params.getlist("stats")
-            extra_fields = self._return_extra_fields(stats)
+            fields = query_params.getlist("fields")
+            extra_fields = self._return_extra_fields(fields)
 
-            if len(stats) == 0:
-                return error.MISSING_STATS
+            if len(fields) == 0:
+                return error.MISSING_FIELDS
 
-            if stats != ["all"] and extra_fields:
+            if fields != ["all"] and extra_fields:
                 return error.extra_fields_passed(extra_fields)
 
-            serializer = self._get_data(stats)
+            serializer = self._get_data(fields)
             return Response(list(serializer.instance)[0], status.HTTP_200_OK)
 
         def _return_extra_fields(self, fields: list) -> list:

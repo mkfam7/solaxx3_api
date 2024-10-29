@@ -2,10 +2,10 @@ from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiExample, OpenApiParameter
 
 STATS_PARAM = OpenApiParameter(
-    name="stats",
+    name="fields",
     location="query",
     required=True,
-    description="Stats to return.",
+    description="Fields to return.",
     style="form",
     explode=True,
     examples=[
@@ -13,13 +13,13 @@ STATS_PARAM = OpenApiParameter(
             name="Ex. 1",
             summary="Using 'all'",
             value=["all"],
-            description="You can use the word 'all' to return all stats.",
+            description="You can use the word 'all' to return all fields.",
         ),
         OpenApiExample(
             name="Ex. 2",
-            summary="Passing list of stats",
+            summary="Passing list of fields",
             value=["upload_time", "grid_voltage_r"],
-            description="Finally, you can pass a list of stats.",
+            description="Finally, you can pass a list of fields.",
         ),
     ],
     many=True,
@@ -74,12 +74,12 @@ BEFORE_PARAM = lambda upload_date_column: OpenApiParameter(
 )
 
 OVERWRITE_PARAM = OpenApiParameter(
-    name="force",
+    name="overwrite",
     enum=["true", "false"],
     default="false",
     location="query",
     required=False,
-    description="Pass 'force' to the query string to overwrite the record in the database, even though it exists.",
+    description="Pass 'overwrite' to the query string to overwrite the record in the database, even though it exists.",
     style="form",
     explode=True,
 )
