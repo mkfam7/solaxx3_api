@@ -7,7 +7,7 @@ on:
     branches: ["main", "develop"]
 
 jobs:
-  build:
+  build-with-django-4-2:
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 4
@@ -23,7 +23,47 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          python -m pip install django~=4.2.0 djangorestframework whitenoise drf-spectacular
+      - name: Run Tests
+        run: |
+          SECRET_KEY="fake" python manage.py test
+  build-with-django-5-0:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install django~=5.0.0 djangorestframework whitenoise drf-spectacular
+      - name: Run Tests
+        run: |
+          SECRET_KEY="fake" python manage.py test
+  build-django-5-1:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install django~=5.1.0 djangorestframework whitenoise drf-spectacular
       - name: Run Tests
         run: |
           SECRET_KEY="fake" python manage.py test
