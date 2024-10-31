@@ -37,13 +37,14 @@ python3 manage.py changepassword [USERNAME]
 ## Usage
 
 ### Start the application
-   ```bash
-   bash start.sh
-   ```
-   or
-   ```bash
-   bash start.sh HOSTNAME PORT
-   ```
+    ```bash
+    bash start.sh
+    ```
+    or
+
+    ```bash
+    bash start.sh HOSTNAME PORT
+    ```
 
    > **HOSTNAME** - the IP Address or the Hostname of the server where the application is hosted.  
    > **PORT** - the port on which the application is available.
@@ -51,15 +52,15 @@ python3 manage.py changepassword [USERNAME]
    If the application was started without parameters, it will become available at http://localhost:8000. Otherwise, it will become available at the location specified by the parameters.
 
 ---
-### Stop the application  
+### Stop the application
 Fron the console where the Django application is running:  
 Press `Ctrl-C`.
 
 ---
-### Rest API application  
+### Rest API application
 #### Administration
 
-  For administrative tasks, Django provides a useful web application at `http://host:port/admin`.
+For administrative tasks, Django provides a useful web application at `http://host:port/admin`.
 
 #### Documentation
 The API documentation can be found at `http://host:port/swagger-docs/`
