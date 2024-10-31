@@ -7,7 +7,10 @@ PIP=pip3
 ${PIP} install -r requirements.txt || exit 1
 
 # Generate a Django secret key
-echo "export SECRET_KEY=$(openssl rand -base64 100)" > .env
+secret_key=$(sed "s/ //g" <<< $(openssl rand -base64 100))
+echo "export SECRET_KEY=${secret_key}" > .env
+
+# Make the secret key available to the other programs
 source .env
 
 # Create table schemas
@@ -15,7 +18,6 @@ ${PYTHON} manage.py makemigrations solax_registers || exit 1
 ${PYTHON} manage.py migrate || exit 1
 
 # Create superuser credentials
-
 if [ -z "${DJANGO_SUPERUSER_USERNAME}" ]; then
     read -p "Superuser name: " DJANGO_SUPERUSER_USERNAME
 fi

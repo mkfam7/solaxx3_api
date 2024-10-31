@@ -25,12 +25,12 @@ from drf_spectacular.views import (
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("solax/", include("solax_registers.urls")),
     path("api/", include("rest_framework.urls"), name="api"),
     path(
-        "swagger-docs/",
+        "docs/",
         SpectacularSwaggerView.as_view(url_name="schema"),
         name="swagger_docs",
     ),
-    path("schema", SpectacularAPIView.as_view(), name="schema"),
+    path("schema/", SpectacularAPIView.as_view(), name="schema"),
+    path("", include("solax_registers.urls")),
 ]

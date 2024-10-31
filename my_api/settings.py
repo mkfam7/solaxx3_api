@@ -11,16 +11,11 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
-
-from environs import Env
+from os import environ
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-env = Env()
-env_path = Path(__file__).resolve().parent.parent / ".env"
-env.read_env(str(env_path), False)
-SECRET_KEY = env.str("SECRET_KEY")
-
+SECRET_KEY = environ["SECRET_KEY"]
 
 DEBUG = False
 ALLOWED_HOSTS = ["*"]
