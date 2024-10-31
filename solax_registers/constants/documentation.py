@@ -76,7 +76,6 @@ BEFORE_PARAM = lambda upload_date_column: OpenApiParameter(
 OVERWRITE_PARAM = OpenApiParameter(
     name="overwrite",
     enum=["true", "false"],
-    default="false",
     location="query",
     required=False,
     description="Pass 'overwrite' to the query string to overwrite the record in the database, even though it exists.",
