@@ -1,4 +1,4 @@
-# Rest API gateway for Solax Inverter
+# Rest API Gateway for Solax Inverter
 
 ## Overview
 This project implements a Rest API Gateway that manages the data retrieved from a solar inverter.
@@ -150,7 +150,7 @@ Examples:
     [GET] `/last-minute-stats/?fields=all`
 
 4. Insert a record:  
-    [POST] `solax/last-minute-stats/`
+    [POST] `/last-minute-stats/`
 
 ---
 ##### `/last-day-stats/` : the most recent retrieved stats aggregated by day (so far)
@@ -167,7 +167,7 @@ Examples:
     [GET] `/last-day-stats/?fields=all`
 
 4. Insert a record:  
-    [POST] `solax/last-day-stats/`
+    [POST] `/last-day-stats/`
 
 ## Django configuration considerations
 

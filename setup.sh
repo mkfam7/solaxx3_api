@@ -4,11 +4,11 @@ PYTHON=python3
 PIP=pip3
 
 # Install required packages
-# ${PIP} install -r requirements.txt || exit 1
+${PIP} install -r requirements.txt || exit 1
 
 # Generate a Django secret key
 echo "export SECRET_KEY=$(openssl rand -hex 100)" > .env
-exit
+
 # Make the secret key available to the other programs
 source .env
 

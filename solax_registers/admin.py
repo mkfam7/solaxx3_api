@@ -3,7 +3,7 @@ from django.contrib.sessions.models import Session
 
 from .models import DailyStatsRecord, LastDayStatsRecord, LastMinuteStatsRecord, MinuteStatsRecord
 
-admin.site.site_header = "Solax API"
+admin.site.site_header = "Rest API"
 admin.site.site_url = "/docs/"
 admin.site.register(LastDayStatsRecord)
 admin.site.register(LastMinuteStatsRecord)
