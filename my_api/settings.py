@@ -11,16 +11,12 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
-
-from environs import Env
+from os import environ
+from django import __version__ as django_version
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-env = Env()
-env_path = Path(__file__).resolve().parent.parent / ".env"
-env.read_env(str(env_path), False)
-SECRET_KEY = env.str("SECRET_KEY")
-
+SECRET_KEY = environ["SECRET_KEY"]
 
 DEBUG = False
 ALLOWED_HOSTS = ["*"]
@@ -53,6 +49,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "my_api.urls"
+
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -68,6 +65,22 @@ TEMPLATES = [
         },
     },
 ]
+STATIC_URL = "static/"
+STATIC_ROOT = "./static"
+
+if django_version.startswith("4"):
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+elif django_version.startswith("5"):
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
+
 WSGI_APPLICATION = "my_api.wsgi.application"
 
 DATABASES = {
@@ -78,28 +91,16 @@ DATABASES = {
 }
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
-    },
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
-
-STATIC_URL = "static/"
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
-STATIC_ROOT = "./static"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -112,8 +113,14 @@ REST_FRAMEWORK = {
 }
 
 SPECTACULAR_SETTINGS = {
-    "TITLE": "Solax API",
-    "DESCRIPTION": "An API storing and retrieving data from various sources.",
-    "VERSION": "0.1.2",
+    "TITLE": "SolaxX3 API",
+    "DESCRIPTION": "An API storing and retrieving data from a SolaxX3 inverter.",
+    "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
 }
+SILENCED_SYSTEM_CHECKS = [
+    "security.W004",
+    "security.W008",
+    "security.W012",
+    "security.W016",
+]
