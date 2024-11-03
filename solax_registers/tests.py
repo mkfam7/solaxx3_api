@@ -7,14 +7,13 @@ from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_RE
 from rest_framework.test import APITestCase
 
 from .models import DailyStatsRecord, LastDayStatsRecord
+from .constants import error
 
 
 User = get_user_model()
 
 
-@override_settings(
-    SECRET_KEY="django-insecure-o$ax$#*gng6qi*j#&9lwof070#f=v^7e9ck)_70@t60kppj&hz"
-)
+@override_settings(SECRET_KEY="django-insecure-o$ax$#*gng6qi*j#&9lwof070#f=v^7e9ck)_70@t60kppj&hz")
 class AddHistoryStatsTests(APITestCase):
     """Tests for adding history stats."""
 
@@ -94,7 +93,7 @@ class AddHistoryStatsTests(APITestCase):
         self.assertListEqual(sorted(extra_fields), ["extra_field"])
 
     def test_force_parameter_true(self):
-        """Test posting data, passing `force=true`."""
+        """Test posting data, passing `overwrite=true`."""
 
         self.client.force_login(self.testuser)
 
@@ -102,14 +101,12 @@ class AddHistoryStatsTests(APITestCase):
 
         url = reverse_lazy("daily_stats", current_app="solax_registers")
         self.client.post(url, data=data, format="json")
-        response = self.client.post(
-            url, data=data, format="json", QUERY_STRING="force=true"
-        )
+        response = self.client.post(url, data=data, format="json", QUERY_STRING="overwrite=true")
 
         self.assertEqual(response.status_code, HTTP_201_CREATED)
 
     def test_force_parameter_false(self):
-        """Test posting data, passing `force=false`."""
+        """Test posting data, passing `overwrite=false`."""
 
         self.client.force_login(self.testuser)
 
@@ -117,15 +114,13 @@ class AddHistoryStatsTests(APITestCase):
 
         url = reverse_lazy("daily_stats", current_app="solax_registers")
         self.client.post(url, data=data, format="json")
-        response = self.client.post(
-            url, data=data, format="json", QUERY_STRING="force=false"
-        )
+        response = self.client.post(url, data=data, format="json", QUERY_STRING="overwrite=false")
 
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
         self.assertEqual(DailyStatsRecord.objects.count(), 1)
 
     def test_no_force_parameter(self):
-        """Test posting data without passing `force` parameter."""
+        """Test posting data without passing `overwrite` parameter."""
 
         self.client.force_login(self.testuser)
 
@@ -139,26 +134,20 @@ class AddHistoryStatsTests(APITestCase):
         self.assertEqual(DailyStatsRecord.objects.count(), 1)
 
     def test_invalid_force_parameter(self):
-        """Test posting data with an invalid `force` parameter."""
+        """Test posting data with an invalid `overwrite` parameter."""
 
         self.client.force_login(self.testuser)
-
-        data = {"detail": "'force' parameter must be either 'true' or 'false'"}
+        data = {"upload_date": "2020-01-01"}
 
         url = reverse_lazy("daily_stats", current_app="solax_registers")
-        self.client.post(url, data=data, format="json")
-        response = self.client.post(
-            url, data=data, format="json", QUERY_STRING="force=x"
-        )
+        response = self.client.post(url, data=data, format="json", QUERY_STRING="overwrite=x")
 
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.json(), data)
+        self.assertEqual(response.json(), error.INVALID_FORCE_PARAM.data)
         self.assertEqual(DailyStatsRecord.objects.count(), 0)
 
 
-@override_settings(
-    SECRET_KEY="django-insecure-o$ax$#*gng6qi*j#&9lwof070#f=v^7e9ck)_70@t60kppj&hz"
-)
+@override_settings(SECRET_KEY="django-insecure-o$ax$#*gng6qi*j#&9lwof070#f=v^7e9ck)_70@t60kppj&hz")
 class GetHistoryStatsTests(APITestCase):
     """Tests for getting history stats."""
 
@@ -180,17 +169,12 @@ class GetHistoryStatsTests(APITestCase):
         DailyStatsRecord(upload_date="2022-01-01").save()
 
     def test_with_no_stats_parameter(self):
-        """Try to get data without specifying the `stats` parameter."""
+        """Try to get data without specifying the `fields` parameter."""
 
         self.client.force_login(self.testuser)
-        response = self.client.get(
-            reverse_lazy("daily_stats"), data={}, QUERY_STRING=""
-        )
+        response = self.client.get(reverse_lazy("daily_stats"), data={}, QUERY_STRING="")
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
-        self.assertDictEqual(
-            response.json(),
-            {"detail": "Query parameter 'stats' is mandatory."},
-        )
+        self.assertDictEqual(response.json(), error.MISSING_FIELDS.data)
 
     def test_get_all_data(self):
         """Try to get all data."""
@@ -215,9 +199,7 @@ class GetHistoryStatsTests(APITestCase):
             },
         ]
 
-        response = self.client.get(
-            reverse_lazy("daily_stats"), data={}, QUERY_STRING="stats=all"
-        )
+        response = self.client.get(reverse_lazy("daily_stats"), data={}, QUERY_STRING="fields=all")
         self.assertEqual(response.status_code, HTTP_200_OK)
         self.assertListEqual(response.json(), result)
 
@@ -227,7 +209,9 @@ class GetHistoryStatsTests(APITestCase):
         self.client.force_login(self.testuser)
 
         response = self.client.get(
-            reverse_lazy("daily_stats"), data={}, QUERY_STRING="stats=all&stats=extra"
+            reverse_lazy("daily_stats"),
+            data={},
+            QUERY_STRING="fields=all&fields=extra",
         )
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
 
@@ -236,14 +220,14 @@ class GetHistoryStatsTests(APITestCase):
         self.assertListEqual(sorted(extra_fields), ["all", "extra"])
 
     def test_with_only_extra_stats(self):
-        """Try to get data by adding only fake field names to the `stats` parameter."""
+        """Try to get data by adding only fake field names to the `fields` parameter."""
 
         self.client.force_login(self.testuser)
 
         response = self.client.get(
             reverse_lazy("daily_stats"),
             data={},
-            QUERY_STRING="stats=extra1&stats=extra2",
+            QUERY_STRING="fields=extra1&fields=extra2",
         )
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
 
@@ -261,7 +245,7 @@ class GetHistoryStatsTests(APITestCase):
         response = self.client.get(
             reverse_lazy("daily_stats"),
             data={},
-            QUERY_STRING="stats=upload_date&before=2021-01-01",
+            QUERY_STRING="fields=upload_date&before=2021-01-01",
         )
         self.assertEqual(response.status_code, HTTP_200_OK)
         self.assertListEqual(response.json(), result)
@@ -276,7 +260,7 @@ class GetHistoryStatsTests(APITestCase):
         response = self.client.get(
             reverse_lazy("daily_stats"),
             data={},
-            QUERY_STRING="stats=upload_date&since=2021-01-01",
+            QUERY_STRING="fields=upload_date&since=2021-01-01",
         )
         self.assertEqual(response.status_code, HTTP_200_OK)
         self.assertListEqual(response.json(), result)
@@ -291,15 +275,13 @@ class GetHistoryStatsTests(APITestCase):
         response = self.client.get(
             reverse_lazy("daily_stats"),
             data={},
-            QUERY_STRING="stats=upload_date&since=2021-01-01&before=2021-01-01",
+            QUERY_STRING="fields=upload_date&since=2021-01-01&before=2021-01-01",
         )
         self.assertEqual(response.status_code, HTTP_200_OK)
         self.assertListEqual(response.json(), result)
 
 
-@override_settings(
-    SECRET_KEY="django-insecure-o$ax$#*gng6qi*j#&9lwof070#f=v^7e9ck)_70@t60kppj&hz"
-)
+@override_settings(SECRET_KEY="django-insecure-o$ax$#*gng6qi*j#&9lwof070#f=v^7e9ck)_70@t60kppj&hz")
 class DeleteHistoryStatsTests(APITestCase):
     """Tests to test deleting history tests."""
 
@@ -320,27 +302,23 @@ class DeleteHistoryStatsTests(APITestCase):
         DailyStatsRecord(upload_date="2021-01-01").save()
         DailyStatsRecord(upload_date="2022-01-01").save()
 
-    def test_deleting_with_no_mode(self):
-        """Try to delete data without passing the `mode` parameter."""
+    def test_deleting_with_no_action(self):
+        """Try to delete data without passing the `action` parameter."""
 
         self.client.force_login(user=self.testuser)
-        result = {"detail": "Non-null query parameter 'mode' is mandatory."}
 
         response = self.client.delete(reverse_lazy("daily_stats"))
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.json(), result)
+        self.assertEqual(response.json(), error.MISSING_ACTION_PARAM.data)
 
-    def test_deleting_with_nonexistent_mode(self):
-        """Try to delete data with passing an invalid `mode` parameter."""
+    def test_deleting_with_nonexistent_action(self):
+        """Try to delete data with passing an invalid `action` parameter."""
 
         self.client.force_login(user=self.testuser)
-        result = {"detail": "Query parameter 'mode' is not among valid modes."}
 
-        response = self.client.delete(
-            reverse_lazy("daily_stats"), QUERY_STRING="mode=x"
-        )
+        response = self.client.delete(reverse_lazy("daily_stats"), QUERY_STRING="action=x")
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.json(), result)
+        self.assertEqual(response.json(), error.INVALID_ACTION_PARAM.data)
 
     def test_truncate(self):
         """Try to delete all data."""
@@ -348,9 +326,7 @@ class DeleteHistoryStatsTests(APITestCase):
         self.client.force_login(user=self.testuser)
         result = {"deleted": 3}
 
-        response = self.client.delete(
-            reverse_lazy("daily_stats"), QUERY_STRING="mode=truncate"
-        )
+        response = self.client.delete(reverse_lazy("daily_stats"), QUERY_STRING="action=truncate")
         self.assertEqual(response.status_code, HTTP_200_OK)
         self.assertEqual(response.json(), result)
 
@@ -362,7 +338,7 @@ class DeleteHistoryStatsTests(APITestCase):
 
         response = self.client.delete(
             reverse_lazy("daily_stats"),
-            QUERY_STRING="mode=delete_older_than&args=2021-01-01",
+            QUERY_STRING="action=delete_older_than&args=2021-01-01",
         )
         self.assertEqual(response.status_code, HTTP_200_OK)
         self.assertEqual(response.json(), result)
@@ -371,18 +347,16 @@ class DeleteHistoryStatsTests(APITestCase):
         """Try to delete all data older than x date, but not pass any date."""
 
         self.client.force_login(user=self.testuser)
-        result = {"detail": "Argument 'date' in 'args' (0) is mandatory."}
 
         response = self.client.delete(
-            reverse_lazy("daily_stats"), QUERY_STRING="mode=delete_older_than"
+            reverse_lazy("daily_stats"),
+            QUERY_STRING="action=delete_older_than",
         )
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.json(), result)
+        self.assertEqual(response.json(), error.MISSING_DATE_ARG.data)
 
 
-@override_settings(
-    SECRET_KEY="django-insecure-o$ax$#*gng6qi*j#&9lwof070#f=v^7e9ck)_70@t60kppj&hz"
-)
+@override_settings(SECRET_KEY="django-insecure-o$ax$#*gng6qi*j#&9lwof070#f=v^7e9ck)_70@t60kppj&hz")
 class AddLastHistoryStatsTests(APITestCase):
     """Tests for adding last history stats."""
 
@@ -464,9 +438,7 @@ class AddLastHistoryStatsTests(APITestCase):
         self.assertListEqual(sorted(extra_fields), ["extra_field"])
 
 
-@override_settings(
-    SECRET_KEY="django-insecure-o$ax$#*gng6qi*j#&9lwof070#f=v^7e9ck)_70@t60kppj&hz"
-)
+@override_settings(SECRET_KEY="django-insecure-o$ax$#*gng6qi*j#&9lwof070#f=v^7e9ck)_70@t60kppj&hz")
 class GetLastHistoryStatsTests(APITestCase):
     """Tests for getting last history stats."""
 
@@ -485,16 +457,13 @@ class GetLastHistoryStatsTests(APITestCase):
         LastDayStatsRecord(upload_date="2020-01-01").save()
 
     def test_with_no_stats_parameter(self):
-        """Try to get data without specifying the `stats` parameter."""
+        """Try to get data without specifying the `fields` parameter."""
 
         self.client.force_login(self.testuser)
         response = self.client.get(reverse_lazy("last_day_stats"), data={})
 
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
-        self.assertDictEqual(
-            response.json(),
-            {"detail": "Query parameter 'stats' is mandatory."},
-        )
+        self.assertDictEqual(response.json(), error.MISSING_FIELDS.data)
 
     def test_get_all_data(self):
         """Try to get all data."""
@@ -509,20 +478,22 @@ class GetLastHistoryStatsTests(APITestCase):
         }
 
         response = self.client.get(
-            reverse_lazy("last_day_stats"), data={}, QUERY_STRING="stats=all"
+            reverse_lazy("last_day_stats"),
+            data={},
+            QUERY_STRING="fields=all",
         )
         self.assertEqual(response.status_code, HTTP_200_OK)
         self.assertDictEqual(response.json(), result)
 
     def test_with_extra_stats(self):
-        """Try to get data by adding fake field names to the `stats` parameter."""
+        """Try to get data by adding fake field names to the `fields` parameter."""
 
         self.client.force_login(self.testuser)
 
         response = self.client.get(
             reverse_lazy("last_day_stats"),
             data={},
-            QUERY_STRING="stats=all&stats=extra",
+            QUERY_STRING="fields=all&fields=extra",
         )
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
 
@@ -531,14 +502,14 @@ class GetLastHistoryStatsTests(APITestCase):
         self.assertListEqual(sorted(extra_fields), ["all", "extra"])
 
     def test_with_only_extra_stats(self):
-        """Try to get data by adding only fake field names to the `stats` parameter."""
+        """Try to get data by adding only fake field names to the `fields` parameter."""
 
         self.client.force_login(self.testuser)
 
         response = self.client.get(
             reverse_lazy("last_day_stats"),
             data={},
-            QUERY_STRING="stats=extra1&stats=extra2",
+            QUERY_STRING="fields=extra1&fields=extra2",
         )
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
 

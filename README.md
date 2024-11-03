@@ -1,72 +1,175 @@
-# Data API
+# Rest API gateway for Solax Inverter
 
-**Warning:** *This API is not yet in its production phase. Therefore the API is not yet secure. However, it supports basic and session authentication using cookies. It currently does not completely support CSRF.*
+## Overview
+This project implements a Rest API Gateway that manages the data retrieved from a solar inverter.
+
+> This module was tested with the [solaxx3](https://github.com/mkfam7/solaxx3) module which performed the data retrieval from the solar inverter.
+
+## Prerequisites
+- django 4.2+
+- python 3.10+
+- openssl
+- bash
+
 
 Project link: [https://github.com/mkfam7/solaxx3_api][project_link]
 
 [project_link]: https://github.com/mkfam7/solaxx3_api
 
+## Installation
 
-This API stores data from the inverter. It supports multiple users with permissions to only one set of data. It currently uses an SQLite database but can be configured otherwise.
+Run the initial setup:
 
-## Prerequisites
+```bash
+bash setup.sh
+```
 
-1. Install the requirements.
+During the setup, the user will be prompted for:
+- **username** - the admin username
+- **password** - the password of the admin user
+- **email** - the email where the admin notifications should be sent to
 
-    ```bash
-    pip3 install -r requirements.txt
-    ```
-
-2. For encrypting passwords and other data, generate a secret key using the following command:
-    ```bash
-    echo "SECRET_KEY=$(openssl rand -base64 100)" > .env
-    ```
-
-3. To create the table schemas, run the following in the project directory:
-
-    ```bash
-    python3 manage.py migrate
-    ```
-
-4. To be able to authenticate in API requests, create a superuser (user that has all permissions):
-
-    ```bash
-    python3 manage.py createsuperuser
-    ```
-
-    You will be asked for a username, optional email, and password.  
-    In case you forgot your password, use this syntax to change your password:
-
-    ```bash
-    python3 manage.py changepassword [USERNAME]
-    ```
-
-    By default, `USERNAME` is `admin`.
-
-5. To ensure proper handling of templates and static files, run the following command:
-
-   ```bash
-   python3 manage.py collectstatic
-   ```
+The password can be changed from the CLI using the following command:
+```bash
+python3 manage.py changepassword [USERNAME]
+```
 
 ## Usage
 
-### Starting/stopping the server
+### Start the application
+    ```bash
+    bash start.sh
+    ```
+    or
 
-To start the server, run the following:
+    ```bash
+    bash start.sh HOSTNAME PORT
+    ```
 
-```bash
-python3 manage.py runserver [TARGET]
-```
+   > **HOSTNAME** - the IP Address or the Hostname of the server where the application is hosted.  
+   > **PORT** - the port on which the application is available.
 
-`TARGET` is the place where to run the server; the default is `localhost:8000` or `127.0.0.1:8000`. If one omits the port from `TARGET`, it defaults to `8000`.
+   If the application was started without parameters, it will become available at http://localhost:8000. Otherwise, it will become available at the location specified by the parameters.
 
-To stop the server, press `Ctrl-C`.
+---
+### Stop the application
+Fron the console where the Django application is running:  
+Press `Ctrl-C`.
 
-### The admin section
+---
+### Rest API application
+#### Administration
 
-For administrative tasks, Django has provided a useful web application. To access this application, navigate to `/admin` endpoint.
+For administrative tasks, Django provides a useful web application at `http://host:port/admin`.
 
-### Documentation
+#### Documentation
+The API documentation can be found at `http://host:port/swagger-docs/`
 
-This API has provided a Swagger documentation for API endpoints. To access it, go to `/swagger-docs/` endpoint.
+---
+### Rest API
+#### Historical data endpoints
+#####  `/minute-stats/` : all historical data with minute granularity
+
+Examples:
+
+1. Retrieve all historical data for the `grid_voltage_t` field:  
+    [GET] `/minute-stats/?fields=upload_time&fields=grid_voltage_t`
+
+2. Retrieve all historical data for the `grid_voltage_r` and `grid_voltage_t` fields:  
+    [GET] `/minute-stats/?fields=upload_time&fields=grid_voltage_r&fields=grid_voltage_t`
+
+3. Query all available fields:  
+    [GET] `/minute-stats/?fields=all`
+
+4. Query all available fields recorded before `2020-01-03`:  
+    [GET] `/minute-stats/?fields=all&before=2020-01-02`
+
+5. Query all available fields recorded after `2020-01-01`:  
+    [GET] `/minute-stats/?fields=all&since=2020-01-02`
+
+6. Query all available fields recorded between `2019-04-01` and `2020-09-30`:  
+    [GET] `/minute-stats/?fields=all&since=2019-04-01&before=2020-09-30`
+7. Insert a record (if a record with the same timestamp does not exist):  
+    [POST] `/minute-stats/`
+
+8. Insert a record with overwrite:  
+    [POST] `/minute-stats/?overwrite=true`
+
+9. Delete all data managed by the `minute-stats` endpoint:  
+    [DELETE] `/minute-stats/?action=truncate`
+
+10. Delete all data managed by the `minute-stats` endpoint which are older than `2020-01-01`:  
+    [DELETE] `/minute-stats/?action=delete_older_than&args=2019-12-31`
+
+---
+##### `/daily-stats/`: historical data aggregated by day
+
+Examples:
+
+1. Retrieve all historical data for the `grid_voltage_t` field:  
+    [GET] `/daily-stats/?fields=upload_time&fields=grid_voltage_t`
+
+2. Retrieve all historical data for the `grid_voltage_r` and `grid_voltage_t` fields:  
+    [GET] `/daily-stats/?fields=upload_time&fields=grid_voltage_r&fields=grid_voltage_t`
+
+3. Query all available fields:  
+    [GET] `/daily-stats/?fields=all`
+
+4. Query all available fields recorded before `2020-01-03`:  
+    [GET] `/daily-stats/?fields=all&before=2020-01-02`
+
+5. Query all available fields recorded after `2020-01-01`:  
+    [GET] `/daily-stats/?fields=all&since=2020-01-02`
+
+6. Query all available fields recorded between `2019-04-01` and `2020-09-30`:  
+    [GET] `/daily-stats/?fields=all&since=2019-04-01&before=2020-09-30`
+7. Insert a record (if a record with the same timestamp does not exist):  
+    [POST] `/daily-stats/`
+
+8. Insert a record with overwrite:  
+    [POST] `/daily-stats/?overwrite=true`
+
+9. Delete all data managed by the `daily-stats` endpoint:  
+    [DELETE] `/daily-stats/?action=truncate`
+
+10. Delete all data managed by the `daily-stats` endpoint which are older than `2020-01-01`:  
+    [DELETE] `/daily-stats/?action=delete_older_than&args=2019-12-31`
+
+---
+#### Latest data endpoints
+##### `/last-minute-stats/`: the most recent retrieved stats  
+
+Examples:
+1. Retrieve the last record for the `grid_voltage_t` field:  
+    [GET] `/last-minute-stats/?fields=upload_time&fields=grid_voltage_t`
+
+2. Retrieve the last record for the `grid_voltage_r` and `grid_voltage_t` fields:    
+    [GET] `/last-minute-stats/?fields=upload_time&fields=grid_voltage_r&fields=grid_voltage_t`
+
+3. Query all available fields:  
+    [GET] `/last-minute-stats/?fields=all`
+
+4. Insert a record:  
+    [POST] `solax/last-minute-stats/`
+
+---
+##### `/last-day-stats/` : the most recent retrieved stats aggregated by day (so far)
+
+Examples:
+
+1. Retrieve the last record for the `grid_voltage_t` field:  
+    [GET] `/last-day-stats/?fields=upload_time&fields=grid_voltage_t`
+
+2. Retrieve the last record for the `grid_voltage_r` and `grid_voltage_t` fields:    
+    [GET] `/last-day-stats/?fields=upload_time&fields=grid_voltage_r&fields=grid_voltage_t`
+
+3. Query all available fields:  
+    [GET] `/last-day-stats/?fields=all`
+
+4. Insert a record:  
+    [POST] `solax/last-day-stats/`
+
+## Django configuration considerations
+
+During setup a superuser is created for administrative purposes. Additional users may be created to operate over the same set of data.  
+The current implementation uses SQLite as a database.
