@@ -115,7 +115,7 @@ REST_FRAMEWORK = {
 SPECTACULAR_SETTINGS = {
     "TITLE": "Rest API Gateway for Solar Inverter",
     "DESCRIPTION": "An API that manipulates data read from a solar inverter.",
-    "VERSION": "1.0.1",
+    "VERSION": "1.0.2",
     "SERVE_INCLUDE_SCHEMA": False,
 }
 SILENCED_SYSTEM_CHECKS = [
@@ -124,3 +124,5 @@ SILENCED_SYSTEM_CHECKS = [
     "security.W012",
     "security.W016",
 ]
+
+CSRF_COOKIE_AGE = 3600 * 24
