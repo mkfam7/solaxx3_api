@@ -1,4 +1,4 @@
-# Rest API Gateway for Solax Inverter
+# Rest API Gateway for Solar Inverter
 
 ## Overview
 This project implements a Rest API Gateway that manages the data retrieved from a solar inverter.
@@ -64,6 +64,9 @@ For administrative tasks, Django provides a useful web application at `http://ho
 
 #### Documentation
 The API documentation can be found at `http://host:port/swagger-docs/`
+
+#### Authentication
+A user can authenticate by submitting a username and password at `/api/login/`.
 
 ---
 ### Rest API
