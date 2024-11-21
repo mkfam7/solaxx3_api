@@ -65,9 +65,6 @@ For administrative tasks, Django provides a useful web application at `http://ho
 #### Documentation
 The API documentation can be found at `http://host:port/swagger-docs/`
 
-#### Authentication
-A user can authenticate by submitting a username and password at `/api/login/`.
-
 ---
 ### Rest API
 #### Historical data endpoints
