@@ -114,7 +114,11 @@ REST_FRAMEWORK = {
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "Rest API Gateway for Solar Inverter",
-    "DESCRIPTION": "An API that manipulates data read from a solar inverter.",
+    "DESCRIPTION": """\
+An API that manipulates data read from a solar inverter. For more details on how to \
+use them, consult [the documentation](\
+https://github.com/mkfam7/solaxx3_api?tab=readme-ov-file#rest-api-gateway-for-solar-inverter\
+).""",
     "VERSION": "1.0.2",
     "SERVE_INCLUDE_SCHEMA": False,
 }

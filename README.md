@@ -1,4 +1,4 @@
-# Rest API Gateway for Solax Inverter
+# Rest API Gateway for Solar Inverter
 
 ## Overview
 This project implements a Rest API Gateway that manages the data retrieved from a solar inverter.
