@@ -34,4 +34,4 @@ export DJANGO_SUPERUSER_USERNAME DJANGO_SUPERUSER_EMAIL DJANGO_SUPERUSER_PASSWOR
 ${PYTHON} manage.py createsuperuser --email "${DJANGO_SUPERUSER_EMAIL:-test@example.com}" --no-input || exit 1
 
 # Collect the Django static files
-${PYTHON} manage.py collectstatic
+${PYTHON} manage.py collectstatic --noinput
