@@ -54,7 +54,6 @@ def create_views(
                 400: OpenApiTypes.OBJECT,
                 (500, "text/html"): OpenApiResponse(response=OpenApiTypes.ANY),
             },
-            description=docs[0]["get"],
             summary=docs[0]["get"],
         )
         def get(self, request: Request) -> Response:
@@ -123,7 +122,6 @@ def create_views(
 
         @extend_schema(
             summary=docs[0]["post"],
-            description=docs[0]["post"],
             responses={
                 201: serializer_class,
                 400: OpenApiTypes.OBJECT,
@@ -163,7 +161,6 @@ def create_views(
             return list(map(attrgetter("name"), self.model._meta.get_fields()))
 
         @extend_schema(
-            description=docs[0]["delete"],
             summary=docs[0]["delete"],
             parameters=documentation.DELETE_PARAMS,
             responses={
@@ -217,7 +214,6 @@ def create_views(
                 400: OpenApiTypes.OBJECT,
                 (500, "text/html"): OpenApiResponse(response=OpenApiTypes.ANY),
             },
-            description=docs[1]["get"],
             summary=docs[1]["get"],
         )
         def get(self, request: Request) -> Response:
@@ -254,7 +250,6 @@ def create_views(
 
         @extend_schema(
             summary=docs[1]["post"],
-            description=docs[1]["post"],
             responses={
                 201: serializer_class,
                 400: OpenApiTypes.OBJECT,

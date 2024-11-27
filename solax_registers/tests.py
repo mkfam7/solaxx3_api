@@ -6,9 +6,8 @@ from django.urls import reverse_lazy
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST
 from rest_framework.test import APITestCase
 
-from .models import DailyStatsRecord, LastDayStatsRecord
 from .constants import error
-
+from .models import DailyStatsRecord, LastDayStatsRecord
 
 User = get_user_model()
 
@@ -516,3 +515,12 @@ class GetLastHistoryStatsTests(APITestCase):
         self.assertIn("Some extra fields were passed:", response.json())
         extra_fields = response.json()["Some extra fields were passed:"]
         self.assertListEqual(sorted(extra_fields), ["extra1", "extra2"])
+
+
+class TestHealthz(APITestCase):
+    "Tests for the healthz endpoint"
+
+    def test_healthz(self):
+        response = self.client.get(reverse_lazy("healthz"))
+        self.assertEqual(response.json(), "healthy")
+        self.assertEqual(response.status_code, 200)

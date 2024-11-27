@@ -65,6 +65,9 @@ For administrative tasks, Django provides a useful web application at `http://ho
 #### Documentation
 The API documentation can be found at `http://host:port/swagger-docs/`
 
+#### Healthy check
+The API provides a health check endpoint at `http://host:port/healthz`.
+
 ---
 ### Rest API
 #### Historical data endpoints
