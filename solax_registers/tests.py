@@ -1,6 +1,9 @@
 """File of API tests."""
 
+import unittest
+
 from django.contrib.auth import get_user_model
+from django.db.models import Model
 from django.test import override_settings
 from django.urls import reverse_lazy
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST
@@ -8,6 +11,7 @@ from rest_framework.test import APITestCase
 
 from .constants import error
 from .models import DailyStatsRecord, LastDayStatsRecord
+from .utils import parse_column_info
 
 User = get_user_model()
 
@@ -524,3 +528,150 @@ class TestHealthz(APITestCase):
         response = self.client.get(reverse_lazy("healthz"))
         self.assertEqual(response.json(), "healthy")
         self.assertEqual(response.status_code, 200)
+
+
+class TestParseColumnInfo(unittest.TestCase):
+    @unittest.expectedFailure
+    def test_parse_with_invalid_type(self):
+        "Try parsing column info with an invalid type."
+
+        parse_column_info(
+            {
+                "column_name": "inverter_status",
+                "column_type": "sample",
+                "nullable": "N/A",
+                "default": 0,
+                "length": "N/A",
+                "choices": "N/A",
+            }
+        )
+
+    def test_parse_with_valid_type(self):
+        "Try parsing column info with a valid type."
+
+        parse_column_info(
+            {
+                "column_name": "inverter_status",
+                "column_type": "integer",
+                "nullable": "N/A",
+                "default": 0,
+                "length": "N/A",
+                "choices": "N/A",
+            }
+        )
+
+    @unittest.expectedFailure
+    def test_parse_with_invalid_nullable(self):
+        "Try parsing column info with an invalid nullable field."
+
+        parse_column_info(
+            {
+                "column_name": "inverter_status",
+                "column_type": "integer",
+                "nullable": "invalid",
+                "default": 0,
+                "length": "N/A",
+                "choices": "N/A",
+            }
+        )
+
+    def test_parse_with_valid_nullable(self):
+        "Try parsing column info with a valid nullable field."
+
+        parse_column_info(
+            {
+                "column_name": "inverter_status",
+                "column_type": "integer",
+                "nullable": True,
+                "default": 0,
+                "length": "N/A",
+                "choices": "N/A",
+            }
+        )
+
+    def test_parse_with_na_nullable(self):
+        "Try parsing column info with an 'N/A' value for the nullable field."
+
+        parse_column_info(
+            {
+                "column_name": "inverter_status",
+                "column_type": "integer",
+                "nullable": "N/A",
+                "default": 0,
+                "length": "N/A",
+                "choices": "N/A",
+            }
+        )
+
+    @unittest.expectedFailure
+    def test_parse_with_string_length(self):
+        "Try parsing column info with an invalid column length."
+
+        parse_column_info(
+            {
+                "column_name": "inverter_status",
+                "column_type": "integer",
+                "nullable": "N/A",
+                "default": 0,
+                "length": "string",
+                "choices": "N/A",
+            }
+        )
+
+    def test_parse_with_na_length(self):
+        "Try parsing column info with an empty value for length."
+
+        parse_column_info(
+            {
+                "column_name": "inverter_status",
+                "column_type": "integer",
+                "nullable": "N/A",
+                "default": 0,
+                "length": "N/A",
+                "choices": "N/A",
+            }
+        )
+
+    @unittest.expectedFailure
+    def test_parse_with_neg_length(self):
+        "Try parsing column info with a negative length."
+
+        parse_column_info(
+            {
+                "column_name": "inverter_status",
+                "column_type": "integer",
+                "nullable": "N/A",
+                "default": 0,
+                "length": -1,
+                "choices": "N/A",
+            }
+        )
+
+    @unittest.expectedFailure
+    def test_parse_with_0_length(self):
+        "Try parsing column info with length=0."
+
+        parse_column_info(
+            {
+                "column_name": "inverter_status",
+                "column_type": "integer",
+                "nullable": "N/A",
+                "default": 0,
+                "length": 0,
+                "choices": "N/A",
+            }
+        )
+
+    def test_parse_with_positive_length(self):
+        "Try parsing column info with a valid length."
+
+        parse_column_info(
+            {
+                "column_name": "inverter_status",
+                "column_type": "integer",
+                "nullable": "N/A",
+                "default": 0,
+                "length": 1,
+                "choices": "N/A",
+            }
+        )

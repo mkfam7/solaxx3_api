@@ -1,0 +1,251 @@
+{
+    "minute_stats": [
+        {
+            "column_name": "inverter_status",
+            "column_type": "positive_small_integer",
+            "nullable": "N/A",
+            "default": 0,
+            "length": "N/A",
+            "choices": [
+                [
+                    0,
+                    "Waiting"
+                ],
+                [
+                    1,
+                    "Checking"
+                ],
+                [
+                    2,
+                    "Normal"
+                ],
+                [
+                    3,
+                    "Fault"
+                ],
+                [
+                    4,
+                    "Permanent Fault"
+                ],
+                [
+                    5,
+                    "Update"
+                ],
+                [
+                    6,
+                    "Off-grid waiting"
+                ],
+                [
+                    7,
+                    "Off-grid"
+                ],
+                [
+                    8,
+                    "Self Testing"
+                ],
+                [
+                    9,
+                    "Idle"
+                ],
+                [
+                    10,
+                    "Standby"
+                ]
+            ]
+        },
+        {
+            "column_name": "grid_voltage_r",
+            "column_type": "positive_small_integer",
+            "nullable": true,
+            "default": "N/A",
+            "length": "N/A",
+            "choices": "N/A"
+        },
+        {
+            "column_name": "grid_voltage_s",
+            "column_type": "positive_small_integer",
+            "nullable": true,
+            "default": "N/A",
+            "length": "N/A",
+            "choices": "N/A"
+        },
+        {
+            "column_name": "grid_voltage_t",
+            "column_type": "positive_small_integer",
+            "nullable": true,
+            "default": "N/A",
+            "length": "N/A",
+            "choices": "N/A"
+        },
+        {
+            "column_name": "battery_capacity",
+            "column_type": "positive_small_integer",
+            "nullable": true,
+            "default": "N/A",
+            "length": "N/A",
+            "choices": "N/A"
+        },
+        {
+            "column_name": "power_dc1",
+            "column_type": "positive_small_integer",
+            "nullable": true,
+            "default": "N/A",
+            "length": "N/A",
+            "choices": "N/A"
+        },
+        {
+            "column_name": "power_dc2",
+            "column_type": "positive_small_integer",
+            "nullable": true,
+            "default": "N/A",
+            "length": "N/A",
+            "choices": "N/A"
+        },
+        {
+            "column_name": "dc_solar_power",
+            "column_type": "positive_small_integer",
+            "nullable": true,
+            "default": "N/A",
+            "length": "N/A",
+            "choices": "N/A"
+        },
+        {
+            "column_name": "battery_power",
+            "column_type": "small_integer",
+            "nullable": true,
+            "default": "N/A",
+            "length": "N/A",
+            "choices": "N/A"
+        },
+        {
+            "column_name": "feed_in_power",
+            "column_type": "small_integer",
+            "nullable": true,
+            "default": "N/A",
+            "length": "N/A",
+            "choices": "N/A"
+        },
+        {
+            "column_name": "time_count_down",
+            "column_type": "positive_small_integer",
+            "nullable": true,
+            "default": "N/A",
+            "length": "N/A",
+            "choices": "N/A"
+        },
+        {
+            "column_name": "grid_power",
+            "column_type": "small_integer",
+            "nullable": true,
+            "default": "N/A",
+            "length": "N/A",
+            "choices": "N/A"
+        },
+        {
+            "column_name": "energy_from_grid_meter",
+            "column_type": "float",
+            "nullable": true,
+            "default": "N/A",
+            "length": 7,
+            "choices": "N/A"
+        },
+        {
+            "column_name": "energy_to_grid_meter",
+            "column_type": "float",
+            "nullable": true,
+            "default": "N/A",
+            "length": 7,
+            "choices": "N/A"
+        },
+        {
+            "column_name": "inv_volt_r",
+            "column_type": "small_integer",
+            "nullable": true,
+            "default": "N/A",
+            "length": "N/A",
+            "choices": "N/A"
+        },
+        {
+            "column_name": "inv_volt_s",
+            "column_type": "small_integer",
+            "nullable": true,
+            "default": "N/A",
+            "length": "N/A",
+            "choices": "N/A"
+        },
+        {
+            "column_name": "inv_volt_t",
+            "column_type": "small_integer",
+            "nullable": true,
+            "default": "N/A",
+            "length": "N/A",
+            "choices": "N/A"
+        },
+        {
+            "column_name": "off_grid_power_active_r",
+            "column_type": "integer",
+            "nullable": true,
+            "default": "N/A",
+            "length": "N/A",
+            "choices": "N/A"
+        },
+        {
+            "column_name": "off_grid_power_active_s",
+            "column_type": "integer",
+            "nullable": true,
+            "default": "N/A",
+            "length": "N/A",
+            "choices": "N/A"
+        },
+        {
+            "column_name": "off_grid_power_active_t",
+            "column_type": "integer",
+            "nullable": true,
+            "default": "N/A",
+            "length": "N/A",
+            "choices": "N/A"
+        },
+        {
+            "column_name": "grid_power_r",
+            "column_type": "integer",
+            "nullable": true,
+            "default": "N/A",
+            "length": "N/A",
+            "choices": "N/A"
+        },
+        {
+            "column_name": "grid_power_s",
+            "column_type": "integer",
+            "nullable": true,
+            "default": "N/A",
+            "length": "N/A",
+            "choices": "N/A"
+        },
+        {
+            "column_name": "grid_power_t",
+            "column_type": "integer",
+            "nullable": true,
+            "default": "N/A",
+            "length": "N/A",
+            "choices": "N/A"
+        }
+    ],
+    "daily_stats": [
+        {
+            "column_name": "feed_in_energy_today_meter",
+            "column_type": "float",
+            "nullable": true,
+            "default": "N/A",
+            "length": 7,
+            "choices": "N/A"
+        },
+        {
+            "column_name": "energy_to_grid_today_quantity",
+            "column_type": "float",
+            "nullable": true,
+            "default": "N/A",
+            "length": 7,
+            "choices": "N/A"
+        }
+    ]
+}
