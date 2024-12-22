@@ -3,7 +3,6 @@
 import unittest
 
 from django.contrib.auth import get_user_model
-from django.db.models import Model
 from django.test import override_settings
 from django.urls import reverse_lazy
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST
@@ -16,7 +15,9 @@ from .utils import parse_column_info
 User = get_user_model()
 
 
-@override_settings(SECRET_KEY="django-insecure-o$ax$#*gng6qi*j#&9lwof070#f=v^7e9ck)_70@t60kppj&hz")
+@override_settings(
+    SECRET_KEY="django-insecure-o$ax$#*gng6qi*j#&9lwof070#f=v^7e9ck)_70@t60kppj&hz",
+)
 class AddHistoryStatsTests(APITestCase):
     """Tests for adding history stats."""
 
@@ -150,7 +151,9 @@ class AddHistoryStatsTests(APITestCase):
         self.assertEqual(DailyStatsRecord.objects.count(), 0)
 
 
-@override_settings(SECRET_KEY="django-insecure-o$ax$#*gng6qi*j#&9lwof070#f=v^7e9ck)_70@t60kppj&hz")
+@override_settings(
+    SECRET_KEY="django-insecure-o$ax$#*gng6qi*j#&9lwof070#f=v^7e9ck)_70@t60kppj&hz",
+)
 class GetHistoryStatsTests(APITestCase):
     """Tests for getting history stats."""
 
@@ -284,7 +287,9 @@ class GetHistoryStatsTests(APITestCase):
         self.assertListEqual(response.json(), result)
 
 
-@override_settings(SECRET_KEY="django-insecure-o$ax$#*gng6qi*j#&9lwof070#f=v^7e9ck)_70@t60kppj&hz")
+@override_settings(
+    SECRET_KEY="django-insecure-o$ax$#*gng6qi*j#&9lwof070#f=v^7e9ck)_70@t60kppj&hz",
+)
 class DeleteHistoryStatsTests(APITestCase):
     """Tests to test deleting history tests."""
 
@@ -359,7 +364,9 @@ class DeleteHistoryStatsTests(APITestCase):
         self.assertEqual(response.json(), error.MISSING_DATE_ARG.data)
 
 
-@override_settings(SECRET_KEY="django-insecure-o$ax$#*gng6qi*j#&9lwof070#f=v^7e9ck)_70@t60kppj&hz")
+@override_settings(
+    SECRET_KEY="django-insecure-o$ax$#*gng6qi*j#&9lwof070#f=v^7e9ck)_70@t60kppj&hz",
+)
 class AddLastHistoryStatsTests(APITestCase):
     """Tests for adding last history stats."""
 
@@ -441,7 +448,9 @@ class AddLastHistoryStatsTests(APITestCase):
         self.assertListEqual(sorted(extra_fields), ["extra_field"])
 
 
-@override_settings(SECRET_KEY="django-insecure-o$ax$#*gng6qi*j#&9lwof070#f=v^7e9ck)_70@t60kppj&hz")
+@override_settings(
+    SECRET_KEY="django-insecure-o$ax$#*gng6qi*j#&9lwof070#f=v^7e9ck)_70@t60kppj&hz",
+)
 class GetLastHistoryStatsTests(APITestCase):
     """Tests for getting last history stats."""
 
@@ -542,7 +551,6 @@ class TestParseColumnInfo(unittest.TestCase):
                 "nullable": "N/A",
                 "default": 0,
                 "length": "N/A",
-                "choices": "N/A",
             }
         )
 
@@ -556,7 +564,6 @@ class TestParseColumnInfo(unittest.TestCase):
                 "nullable": "N/A",
                 "default": 0,
                 "length": "N/A",
-                "choices": "N/A",
             }
         )
 
@@ -571,7 +578,6 @@ class TestParseColumnInfo(unittest.TestCase):
                 "nullable": "invalid",
                 "default": 0,
                 "length": "N/A",
-                "choices": "N/A",
             }
         )
 
@@ -585,7 +591,6 @@ class TestParseColumnInfo(unittest.TestCase):
                 "nullable": True,
                 "default": 0,
                 "length": "N/A",
-                "choices": "N/A",
             }
         )
 
@@ -599,7 +604,6 @@ class TestParseColumnInfo(unittest.TestCase):
                 "nullable": "N/A",
                 "default": 0,
                 "length": "N/A",
-                "choices": "N/A",
             }
         )
 
@@ -614,7 +618,6 @@ class TestParseColumnInfo(unittest.TestCase):
                 "nullable": "N/A",
                 "default": 0,
                 "length": "string",
-                "choices": "N/A",
             }
         )
 
@@ -628,7 +631,6 @@ class TestParseColumnInfo(unittest.TestCase):
                 "nullable": "N/A",
                 "default": 0,
                 "length": "N/A",
-                "choices": "N/A",
             }
         )
 
@@ -643,7 +645,6 @@ class TestParseColumnInfo(unittest.TestCase):
                 "nullable": "N/A",
                 "default": 0,
                 "length": -1,
-                "choices": "N/A",
             }
         )
 
@@ -658,7 +659,6 @@ class TestParseColumnInfo(unittest.TestCase):
                 "nullable": "N/A",
                 "default": 0,
                 "length": 0,
-                "choices": "N/A",
             }
         )
 
@@ -672,6 +672,5 @@ class TestParseColumnInfo(unittest.TestCase):
                 "nullable": "N/A",
                 "default": 0,
                 "length": 1,
-                "choices": "N/A",
             }
         )

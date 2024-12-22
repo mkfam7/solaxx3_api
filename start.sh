@@ -7,4 +7,4 @@ source .env
 
 python3 manage.py makemigrations solax_registers || exit 1
 python3 manage.py migrate || exit 1
-python3 manage.py runserver ${host}:${port}
+gunicorn -c gunicorn_conf.py

@@ -42,7 +42,6 @@ def parse_column_info(column_info: dict):
     COLTYPE = "column_type"
     IS_NULL = "nullable"
     LENGTH = "length"
-    CHOICES = "choices"
     COLUMN_CLASSES = {
         "positive_small_integer": models.PositiveSmallIntegerField,
         "small_integer": models.SmallIntegerField,
@@ -58,7 +57,7 @@ def parse_column_info(column_info: dict):
     kwargs = {**column_info}
     kwargs["null"] = kwargs.pop("nullable")
     kwargs["max_length"] = kwargs.pop("length")
-    kwargs = _filter_args(kwargs, ["null", "default", "max_length", CHOICES])
+    kwargs = _filter_args(kwargs, ["null", "default", "max_length"])
 
     return column_class(**kwargs)
 
