@@ -23,6 +23,7 @@ ListAddMinuteStats, GetUpdateLastMinuteStats = create_views(
             "post": "Push minute stats.",
         },
     ],
+    use_datetime=True,
 )
 ListAddDailyStats, GetUpdateLastDayStats = create_views(
     upload_date_column="upload_date",
@@ -39,6 +40,7 @@ ListAddDailyStats, GetUpdateLastDayStats = create_views(
             "post": "Push last day stats.",
         },
     ],
+    use_datetime=False,
 )
 
 

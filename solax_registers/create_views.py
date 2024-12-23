@@ -18,6 +18,7 @@ def create_views(
     model_serializer: Type[ModelSerializer],
     last_record_model_serializer: Type[ModelSerializer],
     docs: List[Dict[str, str]],
+    use_datetime: bool = True,
 ) -> Tuple[generics.ListCreateAPIView]:
     """A function that returns two views.
     Parameters:
@@ -43,12 +44,17 @@ def create_views(
         ```
     """
 
+    if use_datetime:
+        get_parameters = documentation.GET_PARAMETERS
+    else:
+        get_parameters = documentation.GET_PARAMETERS_WITHOUT_DATETIME
+
     class ListAddDeleteStats(generics.ListCreateAPIView):
         serializer_class = model_serializer
         model: Type[Model] = model_serializer.Meta.model
 
         @extend_schema(
-            parameters=documentation.GET_PARAMETERS(upload_date_column),
+            parameters=get_parameters(upload_date_column),
             responses={
                 200: model_serializer,
                 400: OpenApiTypes.OBJECT,
