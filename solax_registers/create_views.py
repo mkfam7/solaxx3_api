@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from rest_framework.serializers import ModelSerializer
 
 from .constants import documentation, error
-from .utils import set_subtract
+from .utils import remove_keys, set_subtract
 
 
 def create_views(
@@ -236,7 +236,10 @@ def create_views(
                 return error.extra_fields_passed(extra_fields)
 
             serializer = self._get_data(fields)
-            return Response(list(serializer.instance)[0], status.HTTP_200_OK)
+            serializer_content = list(serializer.instance)
+            content_response = {} if len(serializer_content) == 0 else serializer_content[0]
+
+            return Response(remove_keys(content_response, ["id"]), status.HTTP_200_OK)
 
         def _return_extra_fields(self, fields: list) -> list:
             model_fields = self._get_model_fields()
@@ -270,7 +273,11 @@ def create_views(
                 return error.extra_fields_passed(extra_fields)
 
             self.model.objects.all().delete()
-            return super().post(request)
+            response = super().post(request)
+            if response.status_code < 300:
+                return Response(response.data, response.status_code)
+            else:
+                return response
 
         def _return_extra_fields_in_data(self, data: dict) -> list:
             given_fields = list(data.keys())

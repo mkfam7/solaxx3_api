@@ -85,3 +85,10 @@ def _filter_args(column_info: dict, args: list):
         if value != "N/A":
             result[arg] = value
     return result
+
+
+def remove_keys(dictionary, keys):
+    copy_dict = {**dictionary}
+    for key in keys:
+        copy_dict.pop(key)
+    return copy_dict

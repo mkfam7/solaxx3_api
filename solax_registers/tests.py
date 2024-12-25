@@ -390,7 +390,6 @@ class AddLastHistoryStatsTests(APITestCase):
 
         data = {"upload_date": "2022-01-01"}
         result = {
-            "id": 2,
             "upload_date": "2022-01-01",
             "feed_in_energy_today_meter": None,
             "energy_to_grid_today_quantity": None,
@@ -483,7 +482,6 @@ class GetLastHistoryStatsTests(APITestCase):
         self.client.force_login(self.testuser)
 
         result = {
-            "id": 1,
             "upload_date": "2020-01-01",
             "feed_in_energy_today_meter": None,
             "energy_to_grid_today_quantity": None,

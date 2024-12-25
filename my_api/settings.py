@@ -123,7 +123,7 @@ An API that manipulates data read from a solar inverter. For more details on how
 use it, consult [the documentation](\
 https://github.com/mkfam7/solaxx3_api?tab=readme-ov-file#rest-api-gateway-for-solar-inverter\
 ).""",
-    "VERSION": "1.1.0",
+    "VERSION": "1.1.1",
     "SERVE_INCLUDE_SCHEMA": False,
 }
 SILENCED_SYSTEM_CHECKS = [
@@ -173,4 +173,4 @@ LOGGING = {
     },
 }
 
-SESSION_COOKIE_AGE = CSRF_COOKIE_AGE = 3600 * 24
+MAX_CONN_AGE = SESSION_COOKIE_AGE = CSRF_COOKIE_AGE = 3600 * 24
