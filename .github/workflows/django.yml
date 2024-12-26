@@ -34,6 +34,7 @@ jobs:
           echo "Waiting 10 seconds..."
           sleep 10
           grep upload_time - <<< "$(curl -s "http://localhost:8000/minute-stats/?fields=all" -u admin:admin)"
+          pkill gunicorn
   # build-with-django-5:
   #   runs-on: ubuntu-latest
   #   strategy:
