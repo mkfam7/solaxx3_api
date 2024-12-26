@@ -1,7 +1,11 @@
+import json
+from operator import itemgetter
+from os import environ
 from typing import Any, Literal, Type
 
 from django.contrib.auth.models import User
 from django.db import models
+from string import ascii_lowercase
 
 
 def has_user_permission(
@@ -92,3 +96,53 @@ def remove_keys(dictionary, keys):
     for key in keys:
         copy_dict.pop(key)
     return copy_dict
+
+
+def get_sample_column_values(
+    column_info,
+    column_type_fallbacks={
+        "positive_small_integer": 0,
+        "small_integer": -1,
+        "integer": 0,
+        "float": 0.6,
+    },
+    column_values={},
+    datetime_pk=True,
+):
+    result = {}
+    for column in column_info:
+        name = column["column_name"]
+        column_type = column["column_type"]
+
+        if name in column_values:
+            result[name] = column_values[name]
+
+        elif column_type in column_type_fallbacks:
+            result[name] = column_type_fallbacks[column_type]
+
+    date_column = "upload_time" if datetime_pk else "upload_date"
+    date_value = column_values.get(date_column, "2022-01-01 00:00" if datetime_pk else "2022-01-01")
+    result[date_column] = date_value
+    return result
+
+
+def read_columns_file():
+    columns_file = environ.get("COLUMNS_FILE", "columns.json")
+
+    with open(columns_file, encoding="utf-8") as f:
+        columns = json.load(f)
+
+    return columns
+
+
+def get_a_nonexistent_column(index=0):
+    letter = ascii_lowercase[index]
+    columns_for_daily_stats = list(map(itemgetter("column_name"), read_columns_file()["daily_stats"]))
+    nonexistent_column = columns_for_daily_stats[0]
+
+    while len(columns_for_daily_stats) != 0 and nonexistent_column in columns_for_daily_stats:
+        nonexistent_column += letter
+
+    if not columns_for_daily_stats:
+        return "extra"
+    return nonexistent_column

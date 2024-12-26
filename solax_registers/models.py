@@ -6,8 +6,9 @@ from os import environ
 from django.db import models
 
 from solax_registers.utils import parse_column_info
+from .utils import read_columns_file
 
-columns_file = environ.get("COLUMNS_FILE", "columns.json")
+columns_config = read_columns_file()
 
 
 class MinuteStatsRecord(models.Model):
@@ -15,10 +16,7 @@ class MinuteStatsRecord(models.Model):
 
     upload_time = models.DateTimeField(primary_key=True)
 
-    with open(columns_file, encoding="utf-8") as f:
-        columns = json.load(f)["minute_stats"]
-
-    for column_info in columns:
+    for column_info in columns_config["minute_stats"]:
         locals()[column_info["column_name"]] = parse_column_info(column_info)
 
     def __repr__(self):
@@ -30,10 +28,7 @@ class LastMinuteStatsRecord(models.Model):
 
     upload_time = models.DateTimeField()
 
-    with open(columns_file, encoding="utf-8") as f:
-        columns = json.load(f)["minute_stats"]
-
-    for column_info in columns:
+    for column_info in columns_config["minute_stats"]:
         locals()[column_info["column_name"]] = parse_column_info(column_info)
 
     def __repr__(self):
@@ -45,10 +40,7 @@ class DailyStatsRecord(models.Model):
 
     upload_date = models.DateField(primary_key=True)
 
-    with open(columns_file, encoding="utf-8") as f:
-        columns = json.load(f)["daily_stats"]
-
-    for column_info in columns:
+    for column_info in columns_config["daily_stats"]:
         locals()[column_info["column_name"]] = parse_column_info(column_info)
 
     def __repr__(self):
@@ -60,10 +52,7 @@ class LastDayStatsRecord(models.Model):
 
     upload_date = models.DateField()
 
-    with open(columns_file, encoding="utf-8") as f:
-        columns = json.load(f)["daily_stats"]
-
-    for column_info in columns:
+    for column_info in columns_config["daily_stats"]:
         locals()[column_info["column_name"]] = parse_column_info(column_info)
 
     def __repr__(self):

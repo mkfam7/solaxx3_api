@@ -1,3 +1,5 @@
+from django.conf import settings
+from django.shortcuts import render
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiExample, extend_schema
 from rest_framework.generics import ListAPIView
@@ -54,3 +56,8 @@ class Healthz(ListAPIView):
     )
     def get(self, _):
         return Response("healthy", HTTP_200_OK)
+
+
+def index(request):
+    version = settings.SPECTACULAR_SETTINGS["VERSION"]
+    return render(request, "solax_registers/home.html", {"version": version})
