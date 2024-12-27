@@ -19,7 +19,7 @@ from django.contrib import admin
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
-from solax_registers.views import Healthz
+from solax_registers.views import Healthz, index
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -32,4 +32,5 @@ urlpatterns = [
     path("schema/", SpectacularAPIView.as_view(), name="schema"),
     path("", include("solax_registers.urls")),
     path("healthz", Healthz.as_view(), name="healthz"),
+    path("", index, name="home"),
 ]

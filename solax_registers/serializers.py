@@ -23,10 +23,12 @@ class MinuteStatsSerializer(ModelSerializer):
 class LastMinuteStatsSerializer(ModelSerializer):
     class Meta:
         model = LastMinuteStatsRecord
-        fields = "__all__"
+        # fields = "__all__"
+        exclude = ("id",)
 
 
 class LastDayStatsSerializer(ModelSerializer):
     class Meta:
         model = LastDayStatsRecord
-        fields = "__all__"
+        # fields = "__all__"
+        exclude = ("id",)

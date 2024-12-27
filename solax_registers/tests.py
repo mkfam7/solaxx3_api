@@ -1,5 +1,7 @@
 """File of API tests."""
 
+import unittest
+
 from django.contrib.auth import get_user_model
 from django.test import override_settings
 from django.urls import reverse_lazy
@@ -8,11 +10,12 @@ from rest_framework.test import APITestCase
 
 from .constants import error
 from .models import DailyStatsRecord, LastDayStatsRecord
+from .utils import get_a_nonexistent_column, get_sample_column_values, parse_column_info, read_columns_file
 
 User = get_user_model()
+columns = read_columns_file()
 
 
-@override_settings(SECRET_KEY="django-insecure-o$ax$#*gng6qi*j#&9lwof070#f=v^7e9ck)_70@t60kppj&hz")
 class AddHistoryStatsTests(APITestCase):
     """Tests for adding history stats."""
 
@@ -34,11 +37,12 @@ class AddHistoryStatsTests(APITestCase):
         self.client.force_login(self.testuser)
 
         data = {"upload_date": "2022-01-01"}
-        result = {
-            "upload_date": "2022-01-01",
-            "feed_in_energy_today_meter": None,
-            "energy_to_grid_today_quantity": None,
-        }
+        result = get_sample_column_values(
+            columns["daily_stats"],
+            {"positive_small_integer": None, "small_integer": None, "integer": None, "float": None},
+            {"upload_date": "2022-01-01"},
+            datetime_pk=False,
+        )
         url = reverse_lazy("daily_stats", current_app="solax_registers")
         response = self.client.post(url, data=data, format="json")
 
@@ -62,7 +66,9 @@ class AddHistoryStatsTests(APITestCase):
 
         self.client.force_login(self.testuser)
 
-        data = {"upload_date": "2020-01-01", "extra_field": "extra_value"}
+        nonexistent_column = get_a_nonexistent_column()
+
+        data = {"upload_date": "2020-01-01", nonexistent_column: "extra_value"}
 
         url = reverse_lazy("daily_stats", current_app="solax_registers")
         response = self.client.post(url, data=data, format="json")
@@ -72,14 +78,23 @@ class AddHistoryStatsTests(APITestCase):
 
         self.assertIn("Some extra fields were passed:", response.json())
         extra_fields = response.json()["Some extra fields were passed:"]
-        self.assertListEqual(sorted(extra_fields), ["extra_field"])
+        self.assertListEqual(sorted(extra_fields), [nonexistent_column])
+
+    def _get_a_nonexistent_column(self):
+        columns_for_daily_stats = columns["daily_stats"]
+        if columns_for_daily_stats:
+            nonexistent_column = columns_for_daily_stats[0]["column_name"] + "x"
+        else:
+            nonexistent_column = "extra"
+        return nonexistent_column
 
     def test_with_only_extra_fields(self):
         """Test posting data with only extra fields."""
 
         self.client.force_login(self.testuser)
 
-        data = {"extra_field": "extra_value"}
+        extra_column = get_a_nonexistent_column()
+        data = {extra_column: "extra_value"}
 
         url = reverse_lazy("daily_stats", current_app="solax_registers")
         response = self.client.post(url, data=data, format="json")
@@ -89,7 +104,7 @@ class AddHistoryStatsTests(APITestCase):
 
         self.assertIn("Some extra fields were passed:", response.json())
         extra_fields = response.json()["Some extra fields were passed:"]
-        self.assertListEqual(sorted(extra_fields), ["extra_field"])
+        self.assertListEqual(sorted(extra_fields), [extra_column])
 
     def test_force_parameter_true(self):
         """Test posting data, passing `overwrite=true`."""
@@ -146,7 +161,6 @@ class AddHistoryStatsTests(APITestCase):
         self.assertEqual(DailyStatsRecord.objects.count(), 0)
 
 
-@override_settings(SECRET_KEY="django-insecure-o$ax$#*gng6qi*j#&9lwof070#f=v^7e9ck)_70@t60kppj&hz")
 class GetHistoryStatsTests(APITestCase):
     """Tests for getting history stats."""
 
@@ -163,9 +177,13 @@ class GetHistoryStatsTests(APITestCase):
         )
         cls.testuser = User.objects.get(username="testuser")
 
-        DailyStatsRecord(upload_date="2020-01-01").save()
-        DailyStatsRecord(upload_date="2021-01-01").save()
-        DailyStatsRecord(upload_date="2022-01-01").save()
+        DailyStatsRecord.objects.bulk_create(
+            [
+                DailyStatsRecord(upload_date="2020-01-01"),
+                DailyStatsRecord(upload_date="2021-01-01"),
+                DailyStatsRecord(upload_date="2022-01-01"),
+            ],
+        )
 
     def test_with_no_stats_parameter(self):
         """Try to get data without specifying the `fields` parameter."""
@@ -181,21 +199,24 @@ class GetHistoryStatsTests(APITestCase):
         self.client.force_login(self.testuser)
 
         result = [
-            {
-                "upload_date": "2020-01-01",
-                "feed_in_energy_today_meter": None,
-                "energy_to_grid_today_quantity": None,
-            },
-            {
-                "upload_date": "2021-01-01",
-                "feed_in_energy_today_meter": None,
-                "energy_to_grid_today_quantity": None,
-            },
-            {
-                "upload_date": "2022-01-01",
-                "feed_in_energy_today_meter": None,
-                "energy_to_grid_today_quantity": None,
-            },
+            get_sample_column_values(
+                columns["daily_stats"],
+                {"positive_small_integer": None, "small_integer": None, "integer": None, "float": None},
+                {"upload_date": "2020-01-01"},
+                datetime_pk=False,
+            ),
+            get_sample_column_values(
+                columns["daily_stats"],
+                {"positive_small_integer": None, "small_integer": None, "integer": None, "float": None},
+                {"upload_date": "2021-01-01"},
+                datetime_pk=False,
+            ),
+            get_sample_column_values(
+                columns["daily_stats"],
+                {"positive_small_integer": None, "small_integer": None, "integer": None, "float": None},
+                {"upload_date": "2022-01-01"},
+                datetime_pk=False,
+            ),
         ]
 
         response = self.client.get(reverse_lazy("daily_stats"), data={}, QUERY_STRING="fields=all")
@@ -222,17 +243,19 @@ class GetHistoryStatsTests(APITestCase):
         """Try to get data by adding only fake field names to the `fields` parameter."""
 
         self.client.force_login(self.testuser)
+        first_extra_field = get_a_nonexistent_column(0)
+        second_extra_field = get_a_nonexistent_column(1)
 
         response = self.client.get(
             reverse_lazy("daily_stats"),
             data={},
-            QUERY_STRING="fields=extra1&fields=extra2",
+            QUERY_STRING=f"fields={first_extra_field}&fields={second_extra_field}",
         )
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
 
         self.assertIn("Some extra fields were passed:", response.json())
         extra_fields = response.json()["Some extra fields were passed:"]
-        self.assertListEqual(sorted(extra_fields), ["extra1", "extra2"])
+        self.assertListEqual(sorted(extra_fields), [first_extra_field, second_extra_field])
 
     def test_before_parameter(self):
         """Try to filter data using the `before` parameter."""
@@ -280,7 +303,6 @@ class GetHistoryStatsTests(APITestCase):
         self.assertListEqual(response.json(), result)
 
 
-@override_settings(SECRET_KEY="django-insecure-o$ax$#*gng6qi*j#&9lwof070#f=v^7e9ck)_70@t60kppj&hz")
 class DeleteHistoryStatsTests(APITestCase):
     """Tests to test deleting history tests."""
 
@@ -297,9 +319,13 @@ class DeleteHistoryStatsTests(APITestCase):
         )
         cls.testuser = User.objects.get(username="testuser")
 
-        DailyStatsRecord(upload_date="2020-01-01").save()
-        DailyStatsRecord(upload_date="2021-01-01").save()
-        DailyStatsRecord(upload_date="2022-01-01").save()
+        DailyStatsRecord.objects.bulk_create(
+            [
+                DailyStatsRecord(upload_date="2020-01-01"),
+                DailyStatsRecord(upload_date="2021-01-01"),
+                DailyStatsRecord(upload_date="2022-01-01"),
+            ]
+        )
 
     def test_deleting_with_no_action(self):
         """Try to delete data without passing the `action` parameter."""
@@ -355,7 +381,6 @@ class DeleteHistoryStatsTests(APITestCase):
         self.assertEqual(response.json(), error.MISSING_DATE_ARG.data)
 
 
-@override_settings(SECRET_KEY="django-insecure-o$ax$#*gng6qi*j#&9lwof070#f=v^7e9ck)_70@t60kppj&hz")
 class AddLastHistoryStatsTests(APITestCase):
     """Tests for adding last history stats."""
 
@@ -378,12 +403,12 @@ class AddLastHistoryStatsTests(APITestCase):
         self.client.force_login(self.testuser)
 
         data = {"upload_date": "2022-01-01"}
-        result = {
-            "id": 2,
-            "upload_date": "2022-01-01",
-            "feed_in_energy_today_meter": None,
-            "energy_to_grid_today_quantity": None,
-        }
+        result = get_sample_column_values(
+            columns["daily_stats"],
+            {"positive_small_integer": None, "small_integer": None, "integer": None, "float": None},
+            {"upload_date": "2022-01-01"},
+            datetime_pk=False,
+        )
         url = reverse_lazy("last_day_stats", current_app="solax_registers")
         response = self.client.post(url, data=data, format="json")
 
@@ -407,7 +432,8 @@ class AddLastHistoryStatsTests(APITestCase):
 
         self.client.force_login(self.testuser)
 
-        data = {"upload_date": "2020-01-01", "extra_field": "extra_value"}
+        extra_field = get_a_nonexistent_column()
+        data = {"upload_date": "2020-01-01", extra_field: "extra_value"}
 
         url = reverse_lazy("last_day_stats", current_app="solax_registers")
         response = self.client.post(url, data=data, format="json")
@@ -417,14 +443,15 @@ class AddLastHistoryStatsTests(APITestCase):
 
         self.assertIn("Some extra fields were passed:", response.json())
         extra_fields = response.json()["Some extra fields were passed:"]
-        self.assertListEqual(sorted(extra_fields), ["extra_field"])
+        self.assertListEqual(sorted(extra_fields), [extra_field])
 
     def test_with_only_extra_fields(self):
         """Test posting data with only extra fields."""
 
         self.client.force_login(self.testuser)
 
-        data = {"extra_field": "extra_value"}
+        extra_field = get_a_nonexistent_column()
+        data = {extra_field: "extra_value"}
 
         url = reverse_lazy("last_day_stats", current_app="solax_registers")
         response = self.client.post(url, data=data, format="json")
@@ -434,10 +461,9 @@ class AddLastHistoryStatsTests(APITestCase):
 
         self.assertIn("Some extra fields were passed:", response.json())
         extra_fields = response.json()["Some extra fields were passed:"]
-        self.assertListEqual(sorted(extra_fields), ["extra_field"])
+        self.assertListEqual(sorted(extra_fields), [extra_field])
 
 
-@override_settings(SECRET_KEY="django-insecure-o$ax$#*gng6qi*j#&9lwof070#f=v^7e9ck)_70@t60kppj&hz")
 class GetLastHistoryStatsTests(APITestCase):
     """Tests for getting last history stats."""
 
@@ -469,12 +495,12 @@ class GetLastHistoryStatsTests(APITestCase):
 
         self.client.force_login(self.testuser)
 
-        result = {
-            "id": 1,
-            "upload_date": "2020-01-01",
-            "feed_in_energy_today_meter": None,
-            "energy_to_grid_today_quantity": None,
-        }
+        result = get_sample_column_values(
+            columns["daily_stats"],
+            {"positive_small_integer": None, "small_integer": None, "integer": None, "float": None},
+            {"upload_date": "2020-01-01"},
+            datetime_pk=False,
+        )
 
         response = self.client.get(
             reverse_lazy("last_day_stats"),
@@ -489,32 +515,35 @@ class GetLastHistoryStatsTests(APITestCase):
 
         self.client.force_login(self.testuser)
 
+        extra_field = get_a_nonexistent_column()
         response = self.client.get(
             reverse_lazy("last_day_stats"),
             data={},
-            QUERY_STRING="fields=all&fields=extra",
+            QUERY_STRING=f"fields=all&fields={extra_field}",
         )
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
 
         self.assertIn("Some extra fields were passed:", response.json())
         extra_fields = response.json()["Some extra fields were passed:"]
-        self.assertListEqual(sorted(extra_fields), ["all", "extra"])
+        self.assertListEqual(sorted(extra_fields), ["all", extra_field])
 
     def test_with_only_extra_stats(self):
         """Try to get data by adding only fake field names to the `fields` parameter."""
 
         self.client.force_login(self.testuser)
 
+        extra_field1 = get_a_nonexistent_column(0)
+        extra_field2 = get_a_nonexistent_column(1)
         response = self.client.get(
             reverse_lazy("last_day_stats"),
             data={},
-            QUERY_STRING="fields=extra1&fields=extra2",
+            QUERY_STRING=f"fields={extra_field1}&fields={extra_field2}",
         )
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
 
         self.assertIn("Some extra fields were passed:", response.json())
         extra_fields = response.json()["Some extra fields were passed:"]
-        self.assertListEqual(sorted(extra_fields), ["extra1", "extra2"])
+        self.assertListEqual(sorted(extra_fields), [extra_field1, extra_field2])
 
 
 class TestHealthz(APITestCase):
@@ -524,3 +553,140 @@ class TestHealthz(APITestCase):
         response = self.client.get(reverse_lazy("healthz"))
         self.assertEqual(response.json(), "healthy")
         self.assertEqual(response.status_code, 200)
+
+
+class TestParseColumnInfo(unittest.TestCase):
+    @unittest.expectedFailure
+    def test_parse_with_invalid_type(self):
+        "Try parsing column info with an invalid type."
+
+        parse_column_info(
+            {
+                "column_name": "inverter_status",
+                "column_type": "sample",
+                "nullable": "N/A",
+                "default": 0,
+                "length": "N/A",
+            }
+        )
+
+    def test_parse_with_valid_type(self):
+        "Try parsing column info with a valid type."
+
+        parse_column_info(
+            {
+                "column_name": "inverter_status",
+                "column_type": "integer",
+                "nullable": "N/A",
+                "default": 0,
+                "length": "N/A",
+            }
+        )
+
+    @unittest.expectedFailure
+    def test_parse_with_invalid_nullable(self):
+        "Try parsing column info with an invalid nullable field."
+
+        parse_column_info(
+            {
+                "column_name": "inverter_status",
+                "column_type": "integer",
+                "nullable": "invalid",
+                "default": 0,
+                "length": "N/A",
+            }
+        )
+
+    def test_parse_with_valid_nullable(self):
+        "Try parsing column info with a valid nullable field."
+
+        parse_column_info(
+            {
+                "column_name": "inverter_status",
+                "column_type": "integer",
+                "nullable": True,
+                "default": 0,
+                "length": "N/A",
+            }
+        )
+
+    def test_parse_with_na_nullable(self):
+        "Try parsing column info with an 'N/A' value for the nullable field."
+
+        parse_column_info(
+            {
+                "column_name": "inverter_status",
+                "column_type": "integer",
+                "nullable": "N/A",
+                "default": 0,
+                "length": "N/A",
+            }
+        )
+
+    @unittest.expectedFailure
+    def test_parse_with_string_length(self):
+        "Try parsing column info with an invalid column length."
+
+        parse_column_info(
+            {
+                "column_name": "inverter_status",
+                "column_type": "integer",
+                "nullable": "N/A",
+                "default": 0,
+                "length": "string",
+            }
+        )
+
+    def test_parse_with_na_length(self):
+        "Try parsing column info with an empty value for length."
+
+        parse_column_info(
+            {
+                "column_name": "inverter_status",
+                "column_type": "integer",
+                "nullable": "N/A",
+                "default": 0,
+                "length": "N/A",
+            }
+        )
+
+    @unittest.expectedFailure
+    def test_parse_with_neg_length(self):
+        "Try parsing column info with a negative length."
+
+        parse_column_info(
+            {
+                "column_name": "inverter_status",
+                "column_type": "integer",
+                "nullable": "N/A",
+                "default": 0,
+                "length": -1,
+            }
+        )
+
+    @unittest.expectedFailure
+    def test_parse_with_0_length(self):
+        "Try parsing column info with length=0."
+
+        parse_column_info(
+            {
+                "column_name": "inverter_status",
+                "column_type": "integer",
+                "nullable": "N/A",
+                "default": 0,
+                "length": 0,
+            }
+        )
+
+    def test_parse_with_positive_length(self):
+        "Try parsing column info with a valid length."
+
+        parse_column_info(
+            {
+                "column_name": "inverter_status",
+                "column_type": "integer",
+                "nullable": "N/A",
+                "default": 0,
+                "length": 1,
+            }
+        )

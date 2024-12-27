@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from rest_framework.serializers import ModelSerializer
 
 from .constants import documentation, error
-from .utils import set_subtract
+from .utils import remove_keys, set_subtract
 
 
 def create_views(
@@ -18,6 +18,7 @@ def create_views(
     model_serializer: Type[ModelSerializer],
     last_record_model_serializer: Type[ModelSerializer],
     docs: List[Dict[str, str]],
+    use_datetime: bool = True,
 ) -> Tuple[generics.ListCreateAPIView]:
     """A function that returns two views.
     Parameters:
@@ -43,12 +44,17 @@ def create_views(
         ```
     """
 
+    if use_datetime:
+        get_parameters = documentation.GET_PARAMETERS
+    else:
+        get_parameters = documentation.GET_PARAMETERS_WITHOUT_DATETIME
+
     class ListAddDeleteStats(generics.ListCreateAPIView):
         serializer_class = model_serializer
         model: Type[Model] = model_serializer.Meta.model
 
         @extend_schema(
-            parameters=documentation.GET_PARAMETERS(upload_date_column),
+            parameters=get_parameters(upload_date_column),
             responses={
                 200: model_serializer,
                 400: OpenApiTypes.OBJECT,
@@ -230,7 +236,10 @@ def create_views(
                 return error.extra_fields_passed(extra_fields)
 
             serializer = self._get_data(fields)
-            return Response(list(serializer.instance)[0], status.HTTP_200_OK)
+            serializer_content = list(serializer.instance)
+            content_response = {} if len(serializer_content) == 0 else serializer_content[0]
+
+            return Response(remove_keys(content_response, ["id"]), status.HTTP_200_OK)
 
         def _return_extra_fields(self, fields: list) -> list:
             model_fields = self._get_model_fields()
@@ -264,7 +273,11 @@ def create_views(
                 return error.extra_fields_passed(extra_fields)
 
             self.model.objects.all().delete()
-            return super().post(request)
+            response = super().post(request)
+            if response.status_code < 300:
+                return Response(response.data, response.status_code)
+            else:
+                return response
 
         def _return_extra_fields_in_data(self, data: dict) -> list:
             given_fields = list(data.keys())
