@@ -57,6 +57,25 @@ Fron the console where the Django application is running:
 Press `Ctrl-C`.
 
 ---
+### Customizing the columns in the database
+
+Starting with version 1.1.1, the columns in the database can be configured in a JSON file specified by the `COLUMNS_FILE` environment variable. If no such variable exists, the fallback value is `columns.json`.
+
+The configuration under the `minute_stats` key controls the columns for the endpoints `/minute-stats/` and `/last-minute-stats/`, while the `daily_stats` key controls the columns for the endpoints `/daily-stats/` and `/last-day-stats/`.
+Each of these keys contains a list of column configuration data. Each column dictionary is structured as follows:
+
+- `column_name`: The name of the column.
+- `column_type`: The type of the column. Must be either `positive_small_integer`, `small_integer`, `integer`, or `float`.
+- `nullable`: Whether to store empty values as null in the database.
+- `default` (Optional): Any default value in case the user does not specify any value for a column value.
+- `length`: The length of a specified field. Recommended for `float` fields.
+
+For the keys `nullable`, `default`, and `length`, a value of `N/A` could be used to indicate an empty value.
+
+
+Make sure that the columns file is not modified when the server is running or errors will appear.
+
+---
 ### Rest API application
 #### Administration
 
@@ -65,7 +84,7 @@ For administrative tasks, Django provides a useful web application at `http://ho
 #### Documentation
 The API documentation can be found at `http://host:port/swagger-docs/`
 
-#### Healthy check
+#### Health check
 The API provides a health check endpoint at `http://host:port/healthz`.
 
 ---

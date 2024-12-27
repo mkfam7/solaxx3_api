@@ -1,3 +1,5 @@
+from django.conf import settings
+from django.shortcuts import render
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiExample, extend_schema
 from rest_framework.generics import ListAPIView
@@ -23,6 +25,7 @@ ListAddMinuteStats, GetUpdateLastMinuteStats = create_views(
             "post": "Push minute stats.",
         },
     ],
+    use_datetime=True,
 )
 ListAddDailyStats, GetUpdateLastDayStats = create_views(
     upload_date_column="upload_date",
@@ -39,6 +42,7 @@ ListAddDailyStats, GetUpdateLastDayStats = create_views(
             "post": "Push last day stats.",
         },
     ],
+    use_datetime=False,
 )
 
 
@@ -52,3 +56,8 @@ class Healthz(ListAPIView):
     )
     def get(self, _):
         return Response("healthy", HTTP_200_OK)
+
+
+def index(request):
+    version = settings.SPECTACULAR_SETTINGS["VERSION"]
+    return render(request, "solax_registers/home.html", {"version": version})

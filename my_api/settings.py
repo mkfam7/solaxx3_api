@@ -10,13 +10,17 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
-from pathlib import Path
 from os import environ
+from pathlib import Path
+
 from django import __version__ as django_version
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-SECRET_KEY = environ["SECRET_KEY"]
+try:
+    SECRET_KEY = environ["SECRET_KEY"]
+except KeyError:
+    ERROR = "Could not fetch the secret key. Perhaps you forgot to run 'source .env'?"
+    raise KeyError(ERROR) from None
 
 DEBUG = False
 ALLOWED_HOSTS = ["*"]
@@ -119,7 +123,7 @@ An API that manipulates data read from a solar inverter. For more details on how
 use it, consult [the documentation](\
 https://github.com/mkfam7/solaxx3_api?tab=readme-ov-file#rest-api-gateway-for-solar-inverter\
 ).""",
-    "VERSION": "1.1.0",
+    "VERSION": "1.1.1",
     "SERVE_INCLUDE_SCHEMA": False,
 }
 SILENCED_SYSTEM_CHECKS = [
@@ -128,5 +132,45 @@ SILENCED_SYSTEM_CHECKS = [
     "security.W012",
     "security.W016",
 ]
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "root": {
+        "level": "DEBUG",
+        "handlers": ["console"],
+    },
+    "loggers": {
+        "gunicorn.error": {
+            "level": "INFO",
+            "handlers": ["console"],
+            "propagate": False,
+            "qualname": "gunicorn.error",
+        },
+        "gunicorn.access": {
+            "level": "INFO",
+            "handlers": ["console"],
+            "propagate": False,
+            "qualname": "gunicorn.access",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "generic",
+        },
+        "error_console": {
+            "class": "logging.StreamHandler",
+            "formatter": "generic",
+            "stream": "ext://sys.stderr",
+        },
+    },
+    "formatters": {
+        "generic": {
+            "format": "%(asctime)s [%(process)d] [%(levelname)s] %(message)s",
+            "datefmt": "[%Y-%m-%d %H:%M:%S %z]",
+            "class": "logging.Formatter",
+        }
+    },
+}
 
-CSRF_COOKIE_AGE = 3600 * 24
+DATABASES["default"]["MAX_CONN_AGE"] = SESSION_COOKIE_AGE = CSRF_COOKIE_AGE = 3600 * 24

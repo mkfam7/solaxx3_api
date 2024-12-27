@@ -1,5 +1,6 @@
 # Custom
 .env
+*/migrations/
 
 # Django
 *.log

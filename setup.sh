@@ -31,7 +31,9 @@ if [ -z "${DJANGO_SUPERUSER_PASSWORD}" ]; then
 fi
 
 export DJANGO_SUPERUSER_USERNAME DJANGO_SUPERUSER_EMAIL DJANGO_SUPERUSER_PASSWORD
-${PYTHON} manage.py createsuperuser --email "${DJANGO_SUPERUSER_EMAIL:-test@example.com}" --no-input || exit 1
+${PYTHON} manage.py createsuperuser \
+    --email "${DJANGO_SUPERUSER_EMAIL:-test@example.com}" \
+    --no-input || exit 1
 
 # Collect the Django static files
 ${PYTHON} manage.py collectstatic --noinput
