@@ -57,9 +57,9 @@ Fron the console where the Django application is running:
 Press `Ctrl-C`.
 
 ---
-### Customizing the fields in the database
+### Customizing the columns in the database
 
-Starting with version 1.1.1, the fields in the database can be configured in a JSON file specified by the `COLUMNS_FILE` environment variable. If no such variable exists, the fallback value is `columns.json`.
+Starting with version 1.1.1, the columns in the database can be configured in a JSON file specified by the `COLUMNS_FILE` environment variable. If no such variable exists, the fallback value is `columns.json`.
 
 The configuration under the `minute_stats` key controls the columns for the endpoints `/minute-stats/` and `/last-minute-stats/`, while the `daily_stats` key controls the columns for the endpoints `/daily-stats/` and `/last-day-stats/`.
 Each of these keys contains a list of column configuration data. Each column dictionary is structured as follows:

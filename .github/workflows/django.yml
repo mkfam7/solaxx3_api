@@ -12,7 +12,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ["3.13"] #["3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
 
     steps:
       - uses: actions/checkout@v4
@@ -33,28 +33,29 @@ jobs:
           bash start.sh &
           sleep 2
           test '[]' = "$(curl -s "http://localhost:8000/minute-stats/?fields=all" -u admin:admin)"
-  # build-with-django-5:
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     max-parallel: 4
-  #     matrix:
-  #       python-version: ["3.10", "3.11", "3.12", "3.13"]
+  build-with-django-5:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
 
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Set up Python ${{ matrix.python-version }}
-  #       uses: actions/setup-python@v3
-  #       with:
-  #         python-version: ${{ matrix.python-version }}
-  #     - name: Install Dependencies
-  #       run: |
-  #         python -m pip install --upgrade pip
-  #         python -m pip install "django<6.0.0" djangorestframework whitenoise drf-spectacular gunicorn
-  #     - name: Run Tests
-  #       run: |
-  #         SECRET_KEY="fake" python manage.py test
-  #     - name: Test setup
-  #       run: |
-  #         DJANGO_SUPERUSER_EMAIL="a@example.com" DJANGO_SUPERUSER_USERNAME=admin DJANGO_SUPERUSER_PASSWORD=admin bash setup.sh
-  #         bash start.sh &
-  #         grep upload_time - <<< "$(curl -s "http://localhost:8000/minute-stats/?fields=all" -u admin:admin)"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "django<6.0.0" djangorestframework whitenoise drf-spectacular gunicorn
+      - name: Run Tests
+        run: |
+          SECRET_KEY="fake" python manage.py test
+      - name: Test setup
+        run: |
+          DJANGO_SUPERUSER_EMAIL="a@example.com" DJANGO_SUPERUSER_USERNAME=admin DJANGO_SUPERUSER_PASSWORD=admin bash setup.sh
+          bash start.sh &
+          sleep 2
+          test '[]' = "$(curl -s "http://localhost:8000/minute-stats/?fields=all" -u admin:admin)"
