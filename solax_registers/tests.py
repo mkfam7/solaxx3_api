@@ -3,14 +3,18 @@
 import unittest
 
 from django.contrib.auth import get_user_model
-from django.test import override_settings
 from django.urls import reverse_lazy
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST
 from rest_framework.test import APITestCase
 
 from .constants import error
 from .models import DailyStatsRecord, LastDayStatsRecord
-from .utils import get_a_nonexistent_column, get_sample_column_values, parse_column_info, read_columns_file
+from .utils import (
+    get_a_nonexistent_column,
+    get_sample_column_values,
+    parse_column_info,
+    read_columns_file,
+)
 
 User = get_user_model()
 columns = read_columns_file()
@@ -39,7 +43,12 @@ class AddHistoryStatsTests(APITestCase):
         data = {"upload_date": "2022-01-01"}
         result = get_sample_column_values(
             columns["daily_stats"],
-            {"positive_small_integer": None, "small_integer": None, "integer": None, "float": None},
+            {
+                "positive_small_integer": None,
+                "small_integer": None,
+                "integer": None,
+                "float": None,
+            },
             {"upload_date": "2022-01-01"},
             datetime_pk=False,
         )
@@ -115,7 +124,9 @@ class AddHistoryStatsTests(APITestCase):
 
         url = reverse_lazy("daily_stats", current_app="solax_registers")
         self.client.post(url, data=data, format="json")
-        response = self.client.post(url, data=data, format="json", QUERY_STRING="overwrite=true")
+        response = self.client.post(
+            url, data=data, format="json", QUERY_STRING="overwrite=true"
+        )
 
         self.assertEqual(response.status_code, HTTP_201_CREATED)
 
@@ -128,7 +139,9 @@ class AddHistoryStatsTests(APITestCase):
 
         url = reverse_lazy("daily_stats", current_app="solax_registers")
         self.client.post(url, data=data, format="json")
-        response = self.client.post(url, data=data, format="json", QUERY_STRING="overwrite=false")
+        response = self.client.post(
+            url, data=data, format="json", QUERY_STRING="overwrite=false"
+        )
 
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
         self.assertEqual(DailyStatsRecord.objects.count(), 1)
@@ -154,7 +167,9 @@ class AddHistoryStatsTests(APITestCase):
         data = {"upload_date": "2020-01-01"}
 
         url = reverse_lazy("daily_stats", current_app="solax_registers")
-        response = self.client.post(url, data=data, format="json", QUERY_STRING="overwrite=x")
+        response = self.client.post(
+            url, data=data, format="json", QUERY_STRING="overwrite=x"
+        )
 
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json(), error.INVALID_FORCE_PARAM.data)
@@ -189,7 +204,9 @@ class GetHistoryStatsTests(APITestCase):
         """Try to get data without specifying the `fields` parameter."""
 
         self.client.force_login(self.testuser)
-        response = self.client.get(reverse_lazy("daily_stats"), data={}, QUERY_STRING="")
+        response = self.client.get(
+            reverse_lazy("daily_stats"), data={}, QUERY_STRING=""
+        )
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
         self.assertDictEqual(response.json(), error.MISSING_FIELDS.data)
 
@@ -201,25 +218,42 @@ class GetHistoryStatsTests(APITestCase):
         result = [
             get_sample_column_values(
                 columns["daily_stats"],
-                {"positive_small_integer": None, "small_integer": None, "integer": None, "float": None},
+                {
+                    "positive_small_integer": None,
+                    "small_integer": None,
+                    "integer": None,
+                    "float": None,
+                },
                 {"upload_date": "2020-01-01"},
                 datetime_pk=False,
             ),
             get_sample_column_values(
                 columns["daily_stats"],
-                {"positive_small_integer": None, "small_integer": None, "integer": None, "float": None},
+                {
+                    "positive_small_integer": None,
+                    "small_integer": None,
+                    "integer": None,
+                    "float": None,
+                },
                 {"upload_date": "2021-01-01"},
                 datetime_pk=False,
             ),
             get_sample_column_values(
                 columns["daily_stats"],
-                {"positive_small_integer": None, "small_integer": None, "integer": None, "float": None},
+                {
+                    "positive_small_integer": None,
+                    "small_integer": None,
+                    "integer": None,
+                    "float": None,
+                },
                 {"upload_date": "2022-01-01"},
                 datetime_pk=False,
             ),
         ]
 
-        response = self.client.get(reverse_lazy("daily_stats"), data={}, QUERY_STRING="fields=all")
+        response = self.client.get(
+            reverse_lazy("daily_stats"), data={}, QUERY_STRING="fields=all"
+        )
         self.assertEqual(response.status_code, HTTP_200_OK)
         self.assertListEqual(response.json(), result)
 
@@ -255,7 +289,9 @@ class GetHistoryStatsTests(APITestCase):
 
         self.assertIn("Some extra fields were passed:", response.json())
         extra_fields = response.json()["Some extra fields were passed:"]
-        self.assertListEqual(sorted(extra_fields), [first_extra_field, second_extra_field])
+        self.assertListEqual(
+            sorted(extra_fields), [first_extra_field, second_extra_field]
+        )
 
     def test_before_parameter(self):
         """Try to filter data using the `before` parameter."""
@@ -341,7 +377,9 @@ class DeleteHistoryStatsTests(APITestCase):
 
         self.client.force_login(user=self.testuser)
 
-        response = self.client.delete(reverse_lazy("daily_stats"), QUERY_STRING="action=x")
+        response = self.client.delete(
+            reverse_lazy("daily_stats"), QUERY_STRING="action=x"
+        )
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json(), error.INVALID_ACTION_PARAM.data)
 
@@ -351,7 +389,9 @@ class DeleteHistoryStatsTests(APITestCase):
         self.client.force_login(user=self.testuser)
         result = {"deleted": 3}
 
-        response = self.client.delete(reverse_lazy("daily_stats"), QUERY_STRING="action=truncate")
+        response = self.client.delete(
+            reverse_lazy("daily_stats"), QUERY_STRING="action=truncate"
+        )
         self.assertEqual(response.status_code, HTTP_200_OK)
         self.assertEqual(response.json(), result)
 
@@ -405,7 +445,12 @@ class AddLastHistoryStatsTests(APITestCase):
         data = {"upload_date": "2022-01-01"}
         result = get_sample_column_values(
             columns["daily_stats"],
-            {"positive_small_integer": None, "small_integer": None, "integer": None, "float": None},
+            {
+                "positive_small_integer": None,
+                "small_integer": None,
+                "integer": None,
+                "float": None,
+            },
             {"upload_date": "2022-01-01"},
             datetime_pk=False,
         )
@@ -497,7 +542,12 @@ class GetLastHistoryStatsTests(APITestCase):
 
         result = get_sample_column_values(
             columns["daily_stats"],
-            {"positive_small_integer": None, "small_integer": None, "integer": None, "float": None},
+            {
+                "positive_small_integer": None,
+                "small_integer": None,
+                "integer": None,
+                "float": None,
+            },
             {"upload_date": "2020-01-01"},
             datetime_pk=False,
         )
