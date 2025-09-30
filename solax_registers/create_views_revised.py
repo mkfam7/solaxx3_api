@@ -2,8 +2,6 @@ from operator import attrgetter
 from typing import Dict, List, Tuple, Type, Union
 
 from django.db.models import Model
-from django.views import View
-from django.http import HttpRequest
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import generics, status
@@ -11,7 +9,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.serializers import ModelSerializer
 
-from .constants import documentation, error, misc
+from .constants import documentation, error
 from .utils import remove_keys, set_subtract
 
 
@@ -47,41 +45,24 @@ def create_views(
         ```
     """
 
-    # if use_datetime:
-    #     get_parameters = documentation.GET_PARAMETERS
-    # else:
-    #     get_parameters = documentation.GET_PARAMETERS_WITHOUT_DATETIME
-
-    class StatsManager(View):
-        def get(self, request: HttpRequest) -> Response:
-            query_parameters = request.GET
-            record_selection_mode = query_parameters.get("select")
-            if record_selection_mode == "all":
-                return ListAddDeleteStats.as_view()(request)
-            return GetUpdateLastStats.as_view()(request)
-
-        def post(self, request: HttpRequest) -> Response:
-            resp = ListAddDeleteStats.as_view()(request)
-            if resp.status_code != 200:
-                return resp
-            return GetUpdateLastStats.as_view()(request)
-
-        def delete(self, request: HttpRequest) -> Response:
-            return ListAddDeleteStats.as_view()(request)
+    if use_datetime:
+        get_parameters = documentation.GET_PARAMETERS
+    else:
+        get_parameters = documentation.GET_PARAMETERS_WITHOUT_DATETIME
 
     class ListAddDeleteStats(generics.ListCreateAPIView):
         serializer_class = model_serializer
         model: Type[Model] = model_serializer.Meta.model
 
-        # @extend_schema(
-        #     parameters=get_parameters(upload_date_column),
-        #     responses={
-        #         200: model_serializer,
-        #         400: OpenApiTypes.OBJECT,
-        #         (500, "text/html"): OpenApiResponse(response=OpenApiTypes.ANY),
-        #     },
-        #     summary=docs[0]["get"],
-        # )
+        @extend_schema(
+            parameters=get_parameters(upload_date_column),
+            responses={
+                200: model_serializer,
+                400: OpenApiTypes.OBJECT,
+                (500, "text/html"): OpenApiResponse(response=OpenApiTypes.ANY),
+            },
+            summary=docs[0]["get"],
+        )
         def get(self, request: Request) -> Response:
             """Get some data."""
 
@@ -148,15 +129,15 @@ def create_views(
 
             return filter_params
 
-        # @extend_schema(
-        #     summary=docs[0]["post"],
-        #     responses={
-        #         201: serializer_class,
-        #         400: OpenApiTypes.OBJECT,
-        #         (500, "text/html"): OpenApiResponse(response=OpenApiTypes.ANY),
-        #     },
-        #     parameters=documentation.POST_PARAMETERS,
-        # )
+        @extend_schema(
+            summary=docs[0]["post"],
+            responses={
+                201: serializer_class,
+                400: OpenApiTypes.OBJECT,
+                (500, "text/html"): OpenApiResponse(response=OpenApiTypes.ANY),
+            },
+            parameters=documentation.POST_PARAMETERS,
+        )
         def post(self, request: Request) -> Response:
             """Add some data."""
 
@@ -188,32 +169,46 @@ def create_views(
         def _get_model_fields(self) -> list:
             return list(map(attrgetter("name"), self.model._meta.get_fields()))
 
-        # @extend_schema(
-        #     summary=docs[0]["delete"],
-        #     parameters=documentation.DELETE_PARAMS,
-        #     responses={
-        #         200: {"type": "object", "properties": {"deleted": {"type": "integer"}}},
-        #         400: OpenApiTypes.OBJECT,
-        #         (500, "text/html"): OpenApiResponse(response=OpenApiTypes.ANY),
-        #     },
-        # )
+        @extend_schema(
+            summary=docs[0]["delete"],
+            parameters=documentation.DELETE_PARAMS,
+            responses={
+                200: {"type": "object", "properties": {"deleted": {"type": "integer"}}},
+                400: OpenApiTypes.OBJECT,
+                (500, "text/html"): OpenApiResponse(response=OpenApiTypes.ANY),
+            },
+        )
         def delete(self, request: Request) -> Response:
-            older_than_date = request.query_params.get("older-than")
+            MODE_ACTION_MAPPING = {
+                "delete_older_than": self._delete_older_than_date,
+                "truncate": self._truncate,
+            }
+            action = request.query_params.get("action")
+            args = request.query_params.getlist("args")
 
-            if not older_than_date:
-                return self._truncate()
-            return self._delete_older_than_date(older_than_date)
+            if not action:
+                return error.MISSING_ACTION_PARAM
 
-        def _delete_older_than_date(self, d: list) -> Response:
-            filter_params = {f"{upload_date_column}__lte": d}
+            if action not in MODE_ACTION_MAPPING:
+                return error.INVALID_ACTION_PARAM
+
+            return MODE_ACTION_MAPPING[action](args)
+
+        def _delete_older_than_date(self, args: list) -> Response:
+            if args == []:
+                return error.MISSING_DATE_ARG
+
+            date = args[0]
+
+            filter_params = {f"{upload_date_column}__lte": date}
             queryset = self.model.objects.filter(**filter_params)
 
             no_deleted, _ = queryset.delete()
-            return misc.deleted(no_deleted)
+            return error.deleted(no_deleted)
 
-        def _truncate(self) -> Response:
+        def _truncate(self, args: list) -> Response:
             no_deleted, _ = self.model.objects.all().delete()
-            return misc.deleted(no_deleted)
+            return error.deleted(no_deleted)
 
     class GetUpdateLastStats(generics.ListCreateAPIView):
         """Actions for the last record view."""
