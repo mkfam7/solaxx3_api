@@ -4,6 +4,7 @@ import unittest
 import logging
 
 from django.contrib.auth import get_user_model
+from django.test import override_settings
 from django.urls import reverse_lazy
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST
 from rest_framework.test import APITestCase
@@ -365,13 +366,35 @@ class DeleteHistoryStatsTests(APITestCase):
             ]
         )
 
+    def test_deleting_with_no_action(self):
+        """Try to delete data without passing the `action` parameter."""
+
+        self.client.force_login(user=self.testuser)
+
+        response = self.client.delete(reverse_lazy("daily_stats"))
+        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.json(), error.MISSING_ACTION_PARAM.data)
+
+    def test_deleting_with_nonexistent_action(self):
+        """Try to delete data with passing an invalid `action` parameter."""
+
+        self.client.force_login(user=self.testuser)
+
+        response = self.client.delete(
+            reverse_lazy("daily_stats"), QUERY_STRING="action=x"
+        )
+        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.json(), error.INVALID_ACTION_PARAM.data)
+
     def test_truncate(self):
         """Try to delete all data."""
 
         self.client.force_login(user=self.testuser)
         result = {"deleted": 3}
 
-        response = self.client.delete(reverse_lazy("daily_stats"))
+        response = self.client.delete(
+            reverse_lazy("daily_stats"), QUERY_STRING="action=truncate"
+        )
         self.assertEqual(response.status_code, HTTP_200_OK)
         self.assertEqual(response.json(), result)
 
@@ -383,10 +406,22 @@ class DeleteHistoryStatsTests(APITestCase):
 
         response = self.client.delete(
             reverse_lazy("daily_stats"),
-            QUERY_STRING="older-than=2021-01-01",
+            QUERY_STRING="action=delete_older_than&args=2021-01-01",
         )
         self.assertEqual(response.status_code, HTTP_200_OK)
         self.assertEqual(response.json(), result)
+
+    def test_delete_older_than_without_date(self):
+        """Try to delete all data older than x date, but not pass any date."""
+
+        self.client.force_login(user=self.testuser)
+
+        response = self.client.delete(
+            reverse_lazy("daily_stats"),
+            QUERY_STRING="action=delete_older_than",
+        )
+        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.json(), error.MISSING_DATE_ARG.data)
 
 
 class AddLastHistoryStatsTests(APITestCase):

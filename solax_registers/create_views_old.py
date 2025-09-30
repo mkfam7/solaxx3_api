@@ -9,7 +9,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.serializers import ModelSerializer
 
-from .constants import documentation, error
+from .constants import documentation, error, misc
 from .utils import remove_keys, set_subtract
 
 
@@ -20,27 +20,26 @@ def create_views(
     docs: List[Dict[str, str]],
     use_datetime: bool = True,
 ) -> Tuple[generics.ListCreateAPIView]:
-    """
-    A function that returns a view.
+    """A function that returns two views.
+    Parameters:
 
-    Parameters
-    ----------
-    upload_date_column : int
-        column of model representing pushing date.
-    model_serializer : rest_framework.serializers.ModelSerializer
-        serializer of model.
-    last_model_serializer : rest_framework.serializers.ModelSerializer
-        serializer of the model keeping the last record.
-    docs : dict
-        documentation for the views. Example:
+    :param upload_date_column: column of model representing pushing date.
+    :param model_serializer: serializer of model.
+    :param last_model_serializer: serializer of the model keeping the last record.
+    :param docs: documentation for the views. Example:
         ```python
     [
         # for history stats
         {
-            "get": "Get minute stats or last minute stats.",
-            "post": "Push minute stats or last minute stats.",
+            "get": "Get minute stats.",
+            "post": "Push minute stats.",
             "delete": "Delete minute stats.",
         },
+        # for last record stats
+        {
+            "get": "Get last minute stats.",
+            "post": "Push minute stats.",
+        }
     ]
         ```
     """
@@ -204,11 +203,11 @@ def create_views(
             queryset = self.model.objects.filter(**filter_params)
 
             no_deleted, _ = queryset.delete()
-            return error.deleted(no_deleted)
+            return misc.deleted(no_deleted)
 
         def _truncate(self, args: list) -> Response:
             no_deleted, _ = self.model.objects.all().delete()
-            return error.deleted(no_deleted)
+            return misc.deleted(no_deleted)
 
     class GetUpdateLastStats(generics.ListCreateAPIView):
         """Actions for the last record view."""
