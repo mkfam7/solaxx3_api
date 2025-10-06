@@ -59,7 +59,7 @@ def create_views(
                 return self._get_history_stats(
                     {"range": filter_range, "fields": fields}
                 )
-            # return self._get_last_record_stats(request, {"fields": fields})
+            return self._get_last_record_stats({"fields": fields})
 
         def _get_history_stats(self, config: dict) -> Response:
             filter_range = config["range"]
@@ -115,8 +115,24 @@ def create_views(
         ) -> bool:
             return (since, before) == (None, None)
 
-        # def _get_last_record_stats(
-        #     self, config: dict
-        # ) -> Response:
+        def _get_last_record_stats(self, config: dict) -> Response:
+            fields = config["fields"]
+
+            extra_fields = self._get_extra_fields(fields)
+            if extra_fields:
+                return error.extra_fields_passed(extra_fields)
+
+            serializer = self._get_filtered_last_record_data(fields)
+            serializer_content = list(serializer.instance)
+            content_response = (
+                {} if len(serializer_content) == 0 else serializer_content[0]
+            )
+
+            return Response(content_response, status.HTTP_200_OK)
+
+        def _get_filtered_last_record_data(self, stats) -> Type[ModelSerializer]:
+            queryset = self.last_record_model.objects.values(*stats)
+            serializer = last_record_model_serializer(queryset, many=True)
+            return serializer
 
     return StatsManager
