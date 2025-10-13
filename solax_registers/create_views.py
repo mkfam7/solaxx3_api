@@ -138,6 +138,7 @@ def create_views(
 
             payload = request.data
             self._validate_for_extra_fields_in_data(payload)
+            self._post_last_record_stats(payload)
             return self._post_history_stats(payload, overwrite)
 
         def _validate_overwrite(self, overwrite: str) -> bool:
@@ -158,6 +159,13 @@ def create_views(
                     pass
 
             serializer = model_serializer(data=data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        def _post_last_record_stats(self, data: dict) -> Response:
+            self.last_record_model.objects.all().delete()
+            serializer = last_record_model_serializer(data=data)
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
