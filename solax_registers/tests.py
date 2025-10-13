@@ -22,160 +22,146 @@ User = get_user_model()
 columns = read_columns_file()
 
 
-# class AddHistoryStatsTests(APITestCase):
-#     """Tests for adding history stats."""
+class AddHistoryStatsTests(APITestCase):
+    """Tests for adding history stats."""
 
-#     @classmethod
-#     def setUpTestData(cls) -> None:
-#         """Set up test data."""
-#         User.objects.create(
-#             username="testuser",
-#             password="testuser1!",
-#             is_staff=True,
-#             is_active=True,
-#             is_superuser=True,
-#         )
-#         cls.testuser = User.objects.get(username="testuser")
+    @classmethod
+    def setUpTestData(cls) -> None:
+        """Set up test data."""
+        User.objects.create(
+            username="testuser",
+            password="testuser1!",
+            is_staff=True,
+            is_active=True,
+            is_superuser=True,
+        )
+        cls.testuser = User.objects.get(username="testuser")
 
-#     def test_add_valid_data(self):
-#         """Test adding a record with valid data."""
+    def test_add_valid_data(self):
+        """Test adding a record with valid data."""
 
-#         self.client.force_login(self.testuser)
+        self.client.force_login(self.testuser)
 
-#         data = {"upload_date": "2022-01-01"}
-#         result = get_sample_column_values(
-#             columns["daily_stats"],
-#             {
-#                 "positive_small_integer": None,
-#                 "small_integer": None,
-#                 "integer": None,
-#                 "float": None,
-#             },
-#             {"upload_date": "2022-01-01"},
-#             datetime_pk=False,
-#         )
-#         url = reverse_lazy("daily_stats", current_app="solax_registers")
-#         response = self.client.post(url, data=data, format="json")
+        data = {"upload_date": "2022-01-01"}
+        result = get_sample_column_values(
+            columns["daily_stats"],
+            {
+                "positive_small_integer": None,
+                "small_integer": None,
+                "integer": None,
+                "float": None,
+            },
+            {"upload_date": "2022-01-01"},
+            datetime_pk=False,
+        )
+        url = reverse_lazy("daily_stats", current_app="solax_registers")
+        response = self.client.post(url, data=data, format="json")
 
-#         self.assertEqual(response.status_code, HTTP_201_CREATED)
-#         self.assertDictEqual(response.json(), result)
-#         self.assertEqual(DailyStatsRecord.objects.count(), 1)
+        self.assertEqual(response.status_code, HTTP_201_CREATED)
+        self.assertDictEqual(response.json(), result)
+        self.assertEqual(DailyStatsRecord.objects.count(), 1)
 
-#     def test_with_missing_pk(self):
-#         """Test posting data with no timestamp."""
+    def test_with_missing_pk(self):
+        """Test posting data with no timestamp."""
 
-#         self.client.force_login(self.testuser)
+        self.client.force_login(self.testuser)
 
-#         url = reverse_lazy("daily_stats", current_app="solax_registers")
-#         response = self.client.post(url, format="json")
+        url = reverse_lazy("daily_stats", current_app="solax_registers")
+        response = self.client.post(url, format="json")
 
-#         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
-#         self.assertEqual(DailyStatsRecord.objects.count(), 0)
+        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
+        self.assertEqual(DailyStatsRecord.objects.count(), 0)
 
-#     def test_with_extra_fields(self):
-#         """Test posting data with extra fields."""
+    def test_with_extra_fields(self):
+        """Test posting data with extra fields."""
 
-#         self.client.force_login(self.testuser)
+        self.client.force_login(self.testuser)
 
-#         nonexistent_column = get_a_nonexistent_column()
+        nonexistent_column = get_a_nonexistent_column()
 
-#         data = {"upload_date": "2020-01-01", nonexistent_column: "extra_value"}
+        data = {"upload_date": "2020-01-01", nonexistent_column: "extra_value"}
 
-#         url = reverse_lazy("daily_stats", current_app="solax_registers")
-#         response = self.client.post(url, data=data, format="json")
+        url = reverse_lazy("daily_stats", current_app="solax_registers")
+        response = self.client.post(url, data=data, format="json")
 
-#         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
-#         self.assertEqual(DailyStatsRecord.objects.count(), 0)
+        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
+        self.assertEqual(DailyStatsRecord.objects.count(), 0)
 
-#         self.assertIn("Some extra fields were passed:", response.json())
-#         extra_fields = response.json()["Some extra fields were passed:"]
-#         self.assertListEqual(sorted(extra_fields), [nonexistent_column])
+        self.assertIn("Some extra fields were passed:", response.json())
+        extra_fields = response.json()["Some extra fields were passed:"]
+        self.assertListEqual(sorted(extra_fields), [nonexistent_column])
 
-#     def _get_a_nonexistent_column(self):
-#         columns_for_daily_stats = columns["daily_stats"]
-#         if columns_for_daily_stats:
-#             nonexistent_column = columns_for_daily_stats[0]["column_name"] + "x"
-#         else:
-#             nonexistent_column = "extra"
-#         return nonexistent_column
+    def _get_a_nonexistent_column(self):
+        columns_for_daily_stats = columns["daily_stats"]
+        if columns_for_daily_stats:
+            nonexistent_column = columns_for_daily_stats[0]["column_name"] + "x"
+        else:
+            nonexistent_column = "extra"
+        return nonexistent_column
 
-#     def test_with_only_extra_fields(self):
-#         """Test posting data with only extra fields."""
+    def test_with_only_extra_fields(self):
+        """Test posting data with only extra fields."""
 
-#         self.client.force_login(self.testuser)
+        self.client.force_login(self.testuser)
 
-#         extra_column = get_a_nonexistent_column()
-#         data = {extra_column: "extra_value"}
+        extra_column = get_a_nonexistent_column()
+        data = {extra_column: "extra_value"}
 
-#         url = reverse_lazy("daily_stats", current_app="solax_registers")
-#         response = self.client.post(url, data=data, format="json")
+        url = reverse_lazy("daily_stats", current_app="solax_registers")
+        response = self.client.post(url, data=data, format="json")
 
-#         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
-#         self.assertEqual(DailyStatsRecord.objects.count(), 0)
+        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
+        self.assertEqual(DailyStatsRecord.objects.count(), 0)
 
-#         self.assertIn("Some extra fields were passed:", response.json())
-#         extra_fields = response.json()["Some extra fields were passed:"]
-#         self.assertListEqual(sorted(extra_fields), [extra_column])
+        self.assertIn("Some extra fields were passed:", response.json())
+        extra_fields = response.json()["Some extra fields were passed:"]
+        self.assertListEqual(sorted(extra_fields), [extra_column])
 
-#     def test_force_parameter_true(self):
-#         """Test posting data, passing `overwrite=true`."""
+    def test_force_parameter_true(self):
+        """Test posting data, passing `overwrite=true`."""
 
-#         self.client.force_login(self.testuser)
+        self.client.force_login(self.testuser)
 
-#         data = {"upload_date": "2020-01-01"}
+        data = {"upload_date": "2020-01-01"}
 
-#         url = reverse_lazy("daily_stats", current_app="solax_registers")
-#         self.client.post(url, data=data, format="json")
-#         response = self.client.post(
-#             url, data=data, format="json", QUERY_STRING="overwrite=true"
-#         )
+        url = reverse_lazy("daily_stats", current_app="solax_registers")
+        self.client.post(url, data=data, format="json")
+        response = self.client.post(
+            url, data=data, format="json", QUERY_STRING="overwrite=true"
+        )
 
-#         self.assertEqual(response.status_code, HTTP_201_CREATED)
+        self.assertEqual(response.status_code, HTTP_201_CREATED)
 
-#     def test_force_parameter_false(self):
-#         """Test posting data, passing `overwrite=false`."""
+    def test_force_parameter_false(self):
+        """Test posting data, passing `overwrite=false`."""
 
-#         self.client.force_login(self.testuser)
+        self.client.force_login(self.testuser)
 
-#         data = {"upload_date": "2020-01-01"}
+        data = {"upload_date": "2020-01-01"}
 
-#         url = reverse_lazy("daily_stats", current_app="solax_registers")
-#         self.client.post(url, data=data, format="json")
-#         response = self.client.post(
-#             url, data=data, format="json", QUERY_STRING="overwrite=false"
-#         )
+        url = reverse_lazy("daily_stats", current_app="solax_registers")
+        self.client.post(url, data=data, format="json")
+        response = self.client.post(
+            url, data=data, format="json", QUERY_STRING="overwrite=false"
+        )
 
-#         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
-#         self.assertEqual(DailyStatsRecord.objects.count(), 1)
+        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
+        self.assertEqual(DailyStatsRecord.objects.count(), 1)
 
-#     def test_no_force_parameter(self):
-#         """Test posting data without passing `overwrite` parameter."""
+    def test_invalid_force_parameter(self):
+        """Test posting data with an invalid `overwrite` parameter."""
 
-#         self.client.force_login(self.testuser)
+        self.client.force_login(self.testuser)
+        data = {"upload_date": "2020-01-01"}
 
-#         data = {"upload_date": "2020-01-01"}
+        url = reverse_lazy("daily_stats", current_app="solax_registers")
+        response = self.client.post(
+            url, data=data, format="json", QUERY_STRING="overwrite=x"
+        )
 
-#         url = reverse_lazy("daily_stats", current_app="solax_registers")
-#         self.client.post(url, data=data, format="json")
-#         response = self.client.post(url, data=data, format="json")
-
-#         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
-#         self.assertEqual(DailyStatsRecord.objects.count(), 1)
-
-#     def test_invalid_force_parameter(self):
-#         """Test posting data with an invalid `overwrite` parameter."""
-
-#         self.client.force_login(self.testuser)
-#         data = {"upload_date": "2020-01-01"}
-
-#         url = reverse_lazy("daily_stats", current_app="solax_registers")
-#         response = self.client.post(
-#             url, data=data, format="json", QUERY_STRING="overwrite=x"
-#         )
-
-#         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
-#         self.assertEqual(response.json(), error.INVALID_FORCE_PARAM.data)
-#         self.assertEqual(DailyStatsRecord.objects.count(), 0)
+        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.json(), error.INVALID_FORCE_PARAM.data)
+        self.assertEqual(DailyStatsRecord.objects.count(), 0)
 
 
 class GetHistoryStatsTests(APITestCase):
@@ -584,147 +570,147 @@ class GetLastHistoryStatsTests(APITestCase):
         self.assertDictEqual(response.json(), result)
 
 
-# class TestHealthz(APITestCase):
-#     "Tests for the healthz endpoint"
+class TestHealthz(APITestCase):
+    "Tests for the healthz endpoint"
 
-#     def test_healthz(self):
-#         response = self.client.get(reverse_lazy("healthz"))
-#         self.assertEqual(response.json(), "healthy")
-#         self.assertEqual(response.status_code, 200)
+    def test_healthz(self):
+        response = self.client.get(reverse_lazy("healthz"))
+        self.assertEqual(response.json(), "healthy")
+        self.assertEqual(response.status_code, 200)
 
 
-# class TestParseColumnInfo(unittest.TestCase):
-#     @unittest.expectedFailure
-#     def test_parse_with_invalid_type(self):
-#         "Try parsing column info with an invalid type."
+class TestParseColumnInfo(unittest.TestCase):
+    @unittest.expectedFailure
+    def test_parse_with_invalid_type(self):
+        "Try parsing column info with an invalid type."
 
-#         parse_column_info(
-#             {
-#                 "column_name": "inverter_status",
-#                 "column_type": "sample",
-#                 "nullable": "N/A",
-#                 "default": 0,
-#                 "length": "N/A",
-#             }
-#         )
+        parse_column_info(
+            {
+                "column_name": "inverter_status",
+                "column_type": "sample",
+                "nullable": "N/A",
+                "default": 0,
+                "length": "N/A",
+            }
+        )
 
-#     def test_parse_with_valid_type(self):
-#         "Try parsing column info with a valid type."
+    def test_parse_with_valid_type(self):
+        "Try parsing column info with a valid type."
 
-#         parse_column_info(
-#             {
-#                 "column_name": "inverter_status",
-#                 "column_type": "integer",
-#                 "nullable": "N/A",
-#                 "default": 0,
-#                 "length": "N/A",
-#             }
-#         )
+        parse_column_info(
+            {
+                "column_name": "inverter_status",
+                "column_type": "integer",
+                "nullable": "N/A",
+                "default": 0,
+                "length": "N/A",
+            }
+        )
 
-#     @unittest.expectedFailure
-#     def test_parse_with_invalid_nullable(self):
-#         "Try parsing column info with an invalid nullable field."
+    @unittest.expectedFailure
+    def test_parse_with_invalid_nullable(self):
+        "Try parsing column info with an invalid nullable field."
 
-#         parse_column_info(
-#             {
-#                 "column_name": "inverter_status",
-#                 "column_type": "integer",
-#                 "nullable": "invalid",
-#                 "default": 0,
-#                 "length": "N/A",
-#             }
-#         )
+        parse_column_info(
+            {
+                "column_name": "inverter_status",
+                "column_type": "integer",
+                "nullable": "invalid",
+                "default": 0,
+                "length": "N/A",
+            }
+        )
 
-#     def test_parse_with_valid_nullable(self):
-#         "Try parsing column info with a valid nullable field."
+    def test_parse_with_valid_nullable(self):
+        "Try parsing column info with a valid nullable field."
 
-#         parse_column_info(
-#             {
-#                 "column_name": "inverter_status",
-#                 "column_type": "integer",
-#                 "nullable": True,
-#                 "default": 0,
-#                 "length": "N/A",
-#             }
-#         )
+        parse_column_info(
+            {
+                "column_name": "inverter_status",
+                "column_type": "integer",
+                "nullable": True,
+                "default": 0,
+                "length": "N/A",
+            }
+        )
 
-#     def test_parse_with_na_nullable(self):
-#         "Try parsing column info with an 'N/A' value for the nullable field."
+    def test_parse_with_na_nullable(self):
+        "Try parsing column info with an 'N/A' value for the nullable field."
 
-#         parse_column_info(
-#             {
-#                 "column_name": "inverter_status",
-#                 "column_type": "integer",
-#                 "nullable": "N/A",
-#                 "default": 0,
-#                 "length": "N/A",
-#             }
-#         )
+        parse_column_info(
+            {
+                "column_name": "inverter_status",
+                "column_type": "integer",
+                "nullable": "N/A",
+                "default": 0,
+                "length": "N/A",
+            }
+        )
 
-#     @unittest.expectedFailure
-#     def test_parse_with_string_length(self):
-#         "Try parsing column info with an invalid column length."
+    @unittest.expectedFailure
+    def test_parse_with_string_length(self):
+        "Try parsing column info with an invalid column length."
 
-#         parse_column_info(
-#             {
-#                 "column_name": "inverter_status",
-#                 "column_type": "integer",
-#                 "nullable": "N/A",
-#                 "default": 0,
-#                 "length": "string",
-#             }
-#         )
+        parse_column_info(
+            {
+                "column_name": "inverter_status",
+                "column_type": "integer",
+                "nullable": "N/A",
+                "default": 0,
+                "length": "string",
+            }
+        )
 
-#     def test_parse_with_na_length(self):
-#         "Try parsing column info with an empty value for length."
+    def test_parse_with_na_length(self):
+        "Try parsing column info with an empty value for length."
 
-#         parse_column_info(
-#             {
-#                 "column_name": "inverter_status",
-#                 "column_type": "integer",
-#                 "nullable": "N/A",
-#                 "default": 0,
-#                 "length": "N/A",
-#             }
-#         )
+        parse_column_info(
+            {
+                "column_name": "inverter_status",
+                "column_type": "integer",
+                "nullable": "N/A",
+                "default": 0,
+                "length": "N/A",
+            }
+        )
 
-#     @unittest.expectedFailure
-#     def test_parse_with_neg_length(self):
-#         "Try parsing column info with a negative length."
+    @unittest.expectedFailure
+    def test_parse_with_neg_length(self):
+        "Try parsing column info with a negative length."
 
-#         parse_column_info(
-#             {
-#                 "column_name": "inverter_status",
-#                 "column_type": "integer",
-#                 "nullable": "N/A",
-#                 "default": 0,
-#                 "length": -1,
-#             }
-#         )
+        parse_column_info(
+            {
+                "column_name": "inverter_status",
+                "column_type": "integer",
+                "nullable": "N/A",
+                "default": 0,
+                "length": -1,
+            }
+        )
 
-#     @unittest.expectedFailure
-#     def test_parse_with_0_length(self):
-#         "Try parsing column info with length=0."
+    @unittest.expectedFailure
+    def test_parse_with_0_length(self):
+        "Try parsing column info with length=0."
 
-#         parse_column_info(
-#             {
-#                 "column_name": "inverter_status",
-#                 "column_type": "integer",
-#                 "nullable": "N/A",
-#                 "default": 0,
-#                 "length": 0,
-#             }
-#         )
+        parse_column_info(
+            {
+                "column_name": "inverter_status",
+                "column_type": "integer",
+                "nullable": "N/A",
+                "default": 0,
+                "length": 0,
+            }
+        )
 
-#     def test_parse_with_positive_length(self):
-#         "Try parsing column info with a valid length."
+    def test_parse_with_positive_length(self):
+        "Try parsing column info with a valid length."
 
-#         parse_column_info(
-#             {
-#                 "column_name": "inverter_status",
-#                 "column_type": "integer",
-#                 "nullable": "N/A",
-#                 "default": 0,
-#                 "length": 1,
-#             }
-#         )
+        parse_column_info(
+            {
+                "column_name": "inverter_status",
+                "column_type": "integer",
+                "nullable": "N/A",
+                "default": 0,
+                "length": 1,
+            }
+        )

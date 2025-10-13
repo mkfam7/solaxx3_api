@@ -12,7 +12,7 @@ from rest_framework.serializers import ModelSerializer
 from rest_framework.views import APIView
 
 from .constants import documentation, error, misc
-from .utils import remove_keys, set_subtract
+from .utils import Response400Error, catch400, remove_keys, set_subtract
 
 
 def create_views(
@@ -51,10 +51,13 @@ def create_views(
         model: Type[Model] = model_serializer.Meta.model
         last_record_model: Type[Model] = last_record_model_serializer.Meta.model
 
+        @catch400
         def get(self, request: Request) -> Response:
             query_params = request.query_params
             filter_range = (query_params.get("since"), query_params.get("before"))
             fields = query_params.getlist("fields") or self._get_model_fields()
+            self._validate_for_extra_fields(fields)
+
             if filter_range != (None, None):
                 return self._get_history_stats(
                     {"range": filter_range, "fields": fields}
@@ -62,20 +65,17 @@ def create_views(
             return self._get_last_record_stats({"fields": fields})
 
         def _get_history_stats(self, config: dict) -> Response:
-            filter_range = config["range"]
-            fields = config["fields"]
-
-            extra_fields = self._get_extra_fields(fields)
-
-            if extra_fields:
-                return error.extra_fields_passed(extra_fields)
+            filter_range, fields = config["range"], config["fields"]
 
             serialized_data = self._get_filtered_history_data(fields, filter_range)
             return Response(list(serialized_data.instance), status.HTTP_200_OK)
 
-        def _get_extra_fields(self, fields: list) -> list:
+        def _validate_for_extra_fields(self, fields: list) -> list:
             model_fields = self._get_model_fields()
-            return set_subtract(fields, model_fields)
+            extra_fields = set_subtract(fields, model_fields)
+            if extra_fields:
+                error_response = error.extra_fields_passed(extra_fields)
+                raise Response400Error(error_response)
 
         def _get_model_fields(self) -> list:
             return list(map(attrgetter("name"), self.model._meta.get_fields()))
@@ -117,11 +117,6 @@ def create_views(
 
         def _get_last_record_stats(self, config: dict) -> Response:
             fields = config["fields"]
-
-            extra_fields = self._get_extra_fields(fields)
-            if extra_fields:
-                return error.extra_fields_passed(extra_fields)
-
             serializer = self._get_filtered_last_record_data(fields)
             serializer_content = list(serializer.instance)
             content_response = (
@@ -134,5 +129,37 @@ def create_views(
             queryset = self.last_record_model.objects.values(*stats)
             serializer = last_record_model_serializer(queryset, many=True)
             return serializer
+
+        @catch400
+        def post(self, request: Request) -> Response:
+            overwrite = request.query_params.get("overwrite") or "true"
+            self._validate_overwrite(overwrite)
+            overwrite = overwrite == "true"
+
+            payload = request.data
+            self._validate_for_extra_fields_in_data(payload)
+            return self._post_history_stats(payload, overwrite)
+
+        def _post_history_stats(self, data: dict, overwrite: bool) -> Response:
+            if overwrite:
+                try:
+                    primary_key_value = data[upload_date_column]
+                    params_for_filter = {upload_date_column: primary_key_value}
+                    self.model.objects.filter(**params_for_filter).delete()
+                except KeyError:
+                    pass
+
+            serializer = model_serializer(data=data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        def _validate_overwrite(self, overwrite: str) -> bool:
+            if overwrite not in ("true", "false"):
+                raise Response400Error(error.INVALID_FORCE_PARAM)
+
+        def _validate_for_extra_fields_in_data(self, data: dict) -> list:
+            given_fields = list(data.keys())
+            self._validate_for_extra_fields(given_fields)
 
     return StatsManager
