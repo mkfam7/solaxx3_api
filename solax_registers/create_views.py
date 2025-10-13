@@ -140,6 +140,14 @@ def create_views(
             self._validate_for_extra_fields_in_data(payload)
             return self._post_history_stats(payload, overwrite)
 
+        def _validate_overwrite(self, overwrite: str) -> bool:
+            if overwrite not in ("true", "false"):
+                raise Response400Error(error.INVALID_FORCE_PARAM)
+
+        def _validate_for_extra_fields_in_data(self, data: dict) -> list:
+            given_fields = list(data.keys())
+            self._validate_for_extra_fields(given_fields)
+
         def _post_history_stats(self, data: dict, overwrite: bool) -> Response:
             if overwrite:
                 try:
@@ -153,13 +161,5 @@ def create_views(
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        def _validate_overwrite(self, overwrite: str) -> bool:
-            if overwrite not in ("true", "false"):
-                raise Response400Error(error.INVALID_FORCE_PARAM)
-
-        def _validate_for_extra_fields_in_data(self, data: dict) -> list:
-            given_fields = list(data.keys())
-            self._validate_for_extra_fields(given_fields)
 
     return StatsManager
