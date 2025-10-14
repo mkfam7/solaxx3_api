@@ -25,57 +25,66 @@ STATS_PARAM = OpenApiParameter(
     many=True,
 )
 
-SINCE_PARAM = lambda upload_date_column: OpenApiParameter(
+SINCE_PARAM = OpenApiParameter(
     name="since",
-    type=(OpenApiTypes.DATETIME if upload_date_column.endswith("time") else OpenApiTypes.DATE),
+    type=OpenApiTypes.DATETIME,
     location="query",
     required=False,
-    description="First date in filter range. Optional.",
+    description="First date in filter range. Optional. If this param "
+    "and the `before` param are missing, only the last record will be queried.",
     style="form",
     explode=True,
     examples=[
         OpenApiExample(
-            name="Ex. 1",
+            name="Using a datetime value",
             summary="Using a datetime value",
             value="2023-01-01 00:00",
             description="You can use an ISO-8601 format to specify the datetime.",
         ),
         OpenApiExample(
-            name="Ex. 2",
+            name="Using a date value",
             summary="Using a date value",
             value="2023-01-01",
             description="You can also pass an ISO-8601 date instead of datetime.",
         ),
+        OpenApiExample(
+            name="Using 0001-01-01",
+            summary="Using 0001-01-01",
+            value="0001-01-01",
+            description="You can use the date 0001-01-01 and not use the `before` "
+            "param to forcefully query the history stats.",
+        ),
     ],
 )
 
-BEFORE_PARAM = lambda upload_date_column: OpenApiParameter(
+BEFORE_PARAM = OpenApiParameter(
     name="before",
-    type=(OpenApiTypes.DATETIME if upload_date_column.endswith("time") else OpenApiTypes.DATE),
+    type=OpenApiTypes.DATETIME,
     location="query",
     required=False,
-    description="Second date in filter range. Optional.",
+    description="First date in filter range. Optional. If this param "
+    "and the `before` param are missing, only the last record will be queried.",
     style="form",
     explode=True,
     examples=[
         OpenApiExample(
-            name="Ex. 1",
+            name="Using a datetime value",
             summary="Using a datetime value",
-            value="2023-01-01 00:00",
+            value="2020-01-01 00:00",
             description="You can use an ISO-8601 format to specify the datetime.",
         ),
         OpenApiExample(
-            name="Ex. 2",
+            name="Using a date value",
             summary="Using a date value",
-            value="2023-01-01",
+            value="2020-01-01",
             description="You can also pass an ISO-8601 date instead of datetime.",
         ),
     ],
 )
 
-SINCE_PARAM_WITHOUT_DATETIME = lambda upload_date_column: OpenApiParameter(
+SINCE_PARAM_WITHOUT_DATETIME = OpenApiParameter(
     name="since",
-    type=(OpenApiTypes.DATETIME if upload_date_column.endswith("time") else OpenApiTypes.DATE),
+    type=OpenApiTypes.DATE,
     location="query",
     required=False,
     description="First date in filter range. Optional.",
@@ -91,9 +100,9 @@ SINCE_PARAM_WITHOUT_DATETIME = lambda upload_date_column: OpenApiParameter(
     ],
 )
 
-BEFORE_PARAM_WITHOUT_DATETIME = lambda upload_date_column: OpenApiParameter(
+BEFORE_PARAM_WITHOUT_DATETIME = OpenApiParameter(
     name="before",
-    type=(OpenApiTypes.DATETIME if upload_date_column.endswith("time") else OpenApiTypes.DATE),
+    type=OpenApiTypes.DATE,
     location="query",
     required=False,
     description="Second date in filter range. Optional.",
@@ -120,20 +129,16 @@ OVERWRITE_PARAM = OpenApiParameter(
 )
 
 
-GET_PARAMETERS = lambda upload_date_column: [
-    STATS_PARAM,
-    SINCE_PARAM(upload_date_column),
-    BEFORE_PARAM(upload_date_column),
-]
+GET_PARAMETERS = [STATS_PARAM, SINCE_PARAM, BEFORE_PARAM]
 
-GET_PARAMETERS_WITHOUT_DATETIME = lambda upload_date_column: [
+GET_PARAMETERS_WITHOUT_DATETIME = [
     STATS_PARAM,
-    SINCE_PARAM_WITHOUT_DATETIME(upload_date_column),
-    BEFORE_PARAM_WITHOUT_DATETIME(upload_date_column),
+    SINCE_PARAM_WITHOUT_DATETIME,
+    BEFORE_PARAM_WITHOUT_DATETIME,
 ]
 POST_PARAMETERS = [OVERWRITE_PARAM]
 
-MODE_PARAM = OpenApiParameter(
+ACTION_PARAM = OpenApiParameter(
     name="action",
     enum=["delete_older_than", "truncate"],
     location="query",
@@ -166,4 +171,4 @@ ARGS_PARAM = OpenApiParameter(
     explode=True,
 )
 
-DELETE_PARAMS = [MODE_PARAM, ARGS_PARAM]
+DELETE_PARAMS = [ACTION_PARAM, ARGS_PARAM]
