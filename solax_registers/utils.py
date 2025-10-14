@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 from django.db import models
 
 
-class Response400Error(Exception):
+class ResponseException(Exception):
     pass
 
 
@@ -167,7 +167,7 @@ def catch400(func):
     def inner(*args, **kwargs):
         try:
             return func(*args, **kwargs)
-        except Response400Error as exc:
+        except ResponseException as exc:
             return exc.args[0]
 
     return inner
