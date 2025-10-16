@@ -3,8 +3,8 @@ from typing import Dict, List, Tuple, Type, Union
 
 from django.db.models import Model
 
-# from drf_spectacular.types import OpenApiTypes
-# from drf_spectacular.utils import OpenApiResponse, extend_schema
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -36,21 +36,32 @@ def create_views(
     docs : dict
         documentation for the views. Example:
         ```python
-    [
-        # for history stats
-        {
-            "get": "Get minute stats records.",
-            "post": "Push a minute stats record.",
-            "delete": "Delete a minute stats record.",
-        },
-    ]
+    {
+        "get": "Get minute stats records.",
+        "post": "Push a minute stats record.",
+        "delete": "Delete a minute stats record.",
+    },
         ```
     """
+
+    if use_datetime:
+        get_parameters = documentation.GET_PARAMETERS
+    else:
+        get_parameters = documentation.GET_PARAMETERS_WITHOUT_DATETIME
 
     class StatsManager(APIView):
         model: Type[Model] = model_serializer.Meta.model
         last_record_model: Type[Model] = last_record_model_serializer.Meta.model
 
+        @extend_schema(
+            parameters=get_parameters,
+            responses={
+                200: model_serializer,
+                400: OpenApiTypes.OBJECT,
+                (500, "text/html"): OpenApiResponse(response=OpenApiTypes.ANY),
+            },
+            summary=docs["get"],
+        )
         @catch400
         def get(self, request: Request) -> Response:
             query_params = request.query_params
@@ -130,9 +141,18 @@ def create_views(
             serializer = last_record_model_serializer(queryset, many=True)
             return serializer
 
+        @extend_schema(
+            summary=docs["post"],
+            responses={
+                201: model_serializer,
+                400: OpenApiTypes.OBJECT,
+                (500, "text/html"): OpenApiResponse(response=OpenApiTypes.ANY),
+            },
+            parameters=documentation.POST_PARAMETERS,
+        )
         @catch400
         def post(self, request: Request) -> Response:
-            overwrite = request.query_params.get("overwrite") or "true"
+            overwrite = request.query_params.get("overwrite") or "false"
             self._validate_overwrite(overwrite)
             overwrite = overwrite == "true"
 
@@ -164,12 +184,21 @@ def create_views(
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         def _post_last_record_stats(self, data: dict) -> Response:
-            self.last_record_model.objects.all().delete()
             serializer = last_record_model_serializer(data=data)
             serializer.is_valid(raise_exception=True)
-            serializer.save()
+            data = serializer.validated_data
+            self.last_record_model.objects.update_or_create(defaults=data, id=1)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+        @extend_schema(
+            summary=docs["delete"],
+            parameters=documentation.DELETE_PARAMS,
+            responses={
+                200: {"type": "object", "properties": {"deleted": {"type": "integer"}}},
+                400: OpenApiTypes.OBJECT,
+                (500, "text/html"): OpenApiResponse(response=OpenApiTypes.ANY),
+            },
+        )
         @catch400
         def delete(self, request: Request) -> Response:
             actions = {

@@ -62,8 +62,8 @@ BEFORE_PARAM = OpenApiParameter(
     type=OpenApiTypes.DATETIME,
     location="query",
     required=False,
-    description="First date in filter range. Optional. If this param "
-    "and the `before` param are missing, only the last record will be queried.",
+    description="Second date in filter range. Optional. If this param "
+    "and the `since` param are missing, only the last record will be queried.",
     style="form",
     explode=True,
     examples=[
@@ -122,10 +122,11 @@ OVERWRITE_PARAM = OpenApiParameter(
     name="overwrite",
     enum=["true", "false"],
     location="query",
-    required=False,
+    required=True,
     description="Controls whether to insert the record anyway, even though it may already exist.",
     style="form",
     explode=True,
+    default="false",
 )
 
 
