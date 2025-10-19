@@ -499,10 +499,10 @@ class TestHealthz(APITestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_home(self):
-        response = self.client.get("/")
+        self.client.get("/")
 
     def test_minute_stats(self):
-        response = self.client.get(reverse_lazy("minute_stats"))
+        self.client.get(reverse_lazy("minute_stats"))
 
 
 class TestParseColumnInfo(unittest.TestCase):
