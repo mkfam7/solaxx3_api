@@ -26,6 +26,8 @@ DEBUG = False
 ALLOWED_HOSTS = ["*"]
 
 INSTALLED_APPS = [
+    # local
+    "solax_registers.apps.SolaxRegistersConfig",
     # django
     "django.contrib.admin",
     "django.contrib.auth",
@@ -37,8 +39,6 @@ INSTALLED_APPS = [
     # third-party
     "rest_framework",
     "drf_spectacular",
-    # local
-    "solax_registers.apps.SolaxRegistersConfig",
 ]
 
 MIDDLEWARE = [
