@@ -1,7 +1,7 @@
 """File of API tests."""
 
-import unittest
 import logging
+import unittest
 
 from django.contrib.auth import get_user_model
 from django.urls import reverse_lazy
