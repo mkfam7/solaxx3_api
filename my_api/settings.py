@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from os import environ
 from pathlib import Path
 
-from django import __version__ as django_version
+from django import VERSION as django_version
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 try:
@@ -72,10 +72,10 @@ TEMPLATES = [
 STATIC_URL = "static/"
 STATIC_ROOT = "./static"
 
-if django_version.startswith("4"):
+if (4, 0, 0) <= django_version < (5, 0, 0):
     STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-elif django_version.startswith("5"):
+elif django_version < (6, 1, 0):  # based on release notes
     STORAGES = {
         "default": {
             "BACKEND": "django.core.files.storage.FileSystemStorage",
@@ -126,7 +126,7 @@ An API that manipulates data read from a solar inverter. For more details on how
 use it, consult [the documentation](\
 https://github.com/mkfam7/solaxx3_api?tab=readme-ov-file#rest-api-gateway-for-solar-inverter\
 ).""",
-    "VERSION": "1.1.1",
+    "VERSION": "2.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
 }
 SILENCED_SYSTEM_CHECKS = [
