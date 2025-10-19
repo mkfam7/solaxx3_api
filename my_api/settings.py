@@ -91,6 +91,7 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
+        "CONN_HEALTH_CHECKS": True,
     }
 }
 
@@ -176,4 +177,7 @@ LOGGING = {
 }
 
 DATABASES["default"]["MAX_CONN_AGE"] = SESSION_COOKIE_AGE = CSRF_COOKIE_AGE = 3600 * 24
-CONN_HEALTH_CHECKS = True
+KB = 1024
+MB = 1024 * KB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 1 * MB
+DATA_UPLOAD_MAX_NUMBER_FILES = 0
