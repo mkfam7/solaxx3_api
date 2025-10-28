@@ -29,8 +29,8 @@ jobs:
           SECRET_KEY="fake" python manage.py test
       - name: Test setup
         run: |
-          DJANGO_SUPERUSER_EMAIL="a@example.com" DJANGO_SUPERUSER_USERNAME=admin DJANGO_SUPERUSER_PASSWORD=admin bash setup.sh
-          bash start.sh &
+          DJANGO_SUPERUSER_USERNAME=admin DJANGO_SUPERUSER_PASSWORD=admin bash setup.sh
+          API_USERNAME=admin API_PASSWORD=admin bash start.sh -quf &
           sleep 2
           test '[]' = "$(curl -s "http://localhost:8000/minute-stats/?fields=all" -u admin:admin)"
   build-with-django-5:
