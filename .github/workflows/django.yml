@@ -12,7 +12,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
         django-version: ["Django>=5.0.0,<6.0.0", "Django~=4.2.0,<5.0.0"]
 
     steps:
