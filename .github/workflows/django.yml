@@ -33,4 +33,4 @@ jobs:
           API_USERNAME=admin API_PASSWORD=admin bash setup.sh
           API_USERNAME=admin API_PASSWORD=admin bash start.sh -quf &
           sleep 2
-          test '[]' = "$(curl -s "http://localhost:8000/minute-stats/?fields=all" -u admin:admin)"
+          test '[]' = "$(curl -s "http://localhost:8000/minute-stats/" -u admin:admin)"
