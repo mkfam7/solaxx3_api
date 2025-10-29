@@ -27,4 +27,3 @@ MISSING_DATE_ARG = Response(
     {"detail": "Argument 'date' in 'args' (position 0) is mandatory."},
     status.HTTP_400_BAD_REQUEST,
 )
-deleted = lambda no_deleted: Response({"deleted": no_deleted}, status.HTTP_200_OK)

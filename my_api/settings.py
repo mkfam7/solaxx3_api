@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from os import environ
 from pathlib import Path
 
-from django import __version__ as django_version
+from django import VERSION as django_version
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 try:
@@ -26,6 +26,8 @@ DEBUG = False
 ALLOWED_HOSTS = ["*"]
 
 INSTALLED_APPS = [
+    # local
+    "solax_registers.apps.SolaxRegistersConfig",
     # django
     "django.contrib.admin",
     "django.contrib.auth",
@@ -37,8 +39,6 @@ INSTALLED_APPS = [
     # third-party
     "rest_framework",
     "drf_spectacular",
-    # local
-    "solax_registers.apps.SolaxRegistersConfig",
 ]
 
 MIDDLEWARE = [
@@ -72,10 +72,10 @@ TEMPLATES = [
 STATIC_URL = "static/"
 STATIC_ROOT = "./static"
 
-if django_version.startswith("4"):
+if (4, 0, 0) <= django_version < (5, 0, 0):
     STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-elif django_version.startswith("5"):
+elif django_version < (6, 1, 0):  # based on release notes
     STORAGES = {
         "default": {
             "BACKEND": "django.core.files.storage.FileSystemStorage",
@@ -91,11 +91,14 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
+        "CONN_HEALTH_CHECKS": True,
     }
 }
 
 AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
+    },
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
@@ -123,7 +126,7 @@ An API that manipulates data read from a solar inverter. For more details on how
 use it, consult [the documentation](\
 https://github.com/mkfam7/solaxx3_api?tab=readme-ov-file#rest-api-gateway-for-solar-inverter\
 ).""",
-    "VERSION": "1.1.1",
+    "VERSION": "2.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
 }
 SILENCED_SYSTEM_CHECKS = [
@@ -174,3 +177,7 @@ LOGGING = {
 }
 
 DATABASES["default"]["MAX_CONN_AGE"] = SESSION_COOKIE_AGE = CSRF_COOKIE_AGE = 3600 * 24
+KB = 1024
+MB = 1024 * KB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 1 * MB
+DATA_UPLOAD_MAX_NUMBER_FILES = 0

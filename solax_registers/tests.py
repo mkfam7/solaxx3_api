@@ -1,17 +1,23 @@
 """File of API tests."""
 
+import logging
 import unittest
 
 from django.contrib.auth import get_user_model
-from django.test import override_settings
 from django.urls import reverse_lazy
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST
 from rest_framework.test import APITestCase
 
 from .constants import error
 from .models import DailyStatsRecord, LastDayStatsRecord
-from .utils import get_a_nonexistent_column, get_sample_column_values, parse_column_info, read_columns_file
+from .utils import (
+    get_a_nonexistent_column,
+    get_sample_column_values,
+    parse_column_info,
+    read_columns_file,
+)
 
+logging.disable()
 User = get_user_model()
 columns = read_columns_file()
 
@@ -39,7 +45,12 @@ class AddHistoryStatsTests(APITestCase):
         data = {"upload_date": "2022-01-01"}
         result = get_sample_column_values(
             columns["daily_stats"],
-            {"positive_small_integer": None, "small_integer": None, "integer": None, "float": None},
+            {
+                "positive_small_integer": None,
+                "small_integer": None,
+                "integer": None,
+                "float": None,
+            },
             {"upload_date": "2022-01-01"},
             datetime_pk=False,
         )
@@ -49,6 +60,7 @@ class AddHistoryStatsTests(APITestCase):
         self.assertEqual(response.status_code, HTTP_201_CREATED)
         self.assertDictEqual(response.json(), result)
         self.assertEqual(DailyStatsRecord.objects.count(), 1)
+        self.assertEqual(LastDayStatsRecord.objects.count(), 1)
 
     def test_with_missing_pk(self):
         """Test posting data with no timestamp."""
@@ -56,10 +68,11 @@ class AddHistoryStatsTests(APITestCase):
         self.client.force_login(self.testuser)
 
         url = reverse_lazy("daily_stats", current_app="solax_registers")
-        response = self.client.post(url, data={}, format="json")
+        response = self.client.post(url, format="json")
 
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
         self.assertEqual(DailyStatsRecord.objects.count(), 0)
+        self.assertEqual(LastDayStatsRecord.objects.count(), 0)
 
     def test_with_extra_fields(self):
         """Test posting data with extra fields."""
@@ -75,6 +88,7 @@ class AddHistoryStatsTests(APITestCase):
 
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
         self.assertEqual(DailyStatsRecord.objects.count(), 0)
+        self.assertEqual(LastDayStatsRecord.objects.count(), 0)
 
         self.assertIn("Some extra fields were passed:", response.json())
         extra_fields = response.json()["Some extra fields were passed:"]
@@ -101,6 +115,7 @@ class AddHistoryStatsTests(APITestCase):
 
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
         self.assertEqual(DailyStatsRecord.objects.count(), 0)
+        self.assertEqual(LastDayStatsRecord.objects.count(), 0)
 
         self.assertIn("Some extra fields were passed:", response.json())
         extra_fields = response.json()["Some extra fields were passed:"]
@@ -115,9 +130,13 @@ class AddHistoryStatsTests(APITestCase):
 
         url = reverse_lazy("daily_stats", current_app="solax_registers")
         self.client.post(url, data=data, format="json")
-        response = self.client.post(url, data=data, format="json", QUERY_STRING="overwrite=true")
+        response = self.client.post(
+            url, data=data, format="json", QUERY_STRING="overwrite=true"
+        )
 
         self.assertEqual(response.status_code, HTTP_201_CREATED)
+        self.assertEqual(DailyStatsRecord.objects.count(), 1)
+        self.assertEqual(LastDayStatsRecord.objects.count(), 1)
 
     def test_force_parameter_false(self):
         """Test posting data, passing `overwrite=false`."""
@@ -128,24 +147,13 @@ class AddHistoryStatsTests(APITestCase):
 
         url = reverse_lazy("daily_stats", current_app="solax_registers")
         self.client.post(url, data=data, format="json")
-        response = self.client.post(url, data=data, format="json", QUERY_STRING="overwrite=false")
+        response = self.client.post(
+            url, data=data, format="json", QUERY_STRING="overwrite=false"
+        )
 
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
         self.assertEqual(DailyStatsRecord.objects.count(), 1)
-
-    def test_no_force_parameter(self):
-        """Test posting data without passing `overwrite` parameter."""
-
-        self.client.force_login(self.testuser)
-
-        data = {"upload_date": "2020-01-01"}
-
-        url = reverse_lazy("daily_stats", current_app="solax_registers")
-        self.client.post(url, data=data, format="json")
-        response = self.client.post(url, data=data, format="json")
-
-        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
-        self.assertEqual(DailyStatsRecord.objects.count(), 1)
+        self.assertEqual(LastDayStatsRecord.objects.count(), 1)
 
     def test_invalid_force_parameter(self):
         """Test posting data with an invalid `overwrite` parameter."""
@@ -154,11 +162,14 @@ class AddHistoryStatsTests(APITestCase):
         data = {"upload_date": "2020-01-01"}
 
         url = reverse_lazy("daily_stats", current_app="solax_registers")
-        response = self.client.post(url, data=data, format="json", QUERY_STRING="overwrite=x")
+        response = self.client.post(
+            url, data=data, format="json", QUERY_STRING="overwrite=x"
+        )
 
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json(), error.INVALID_FORCE_PARAM.data)
         self.assertEqual(DailyStatsRecord.objects.count(), 0)
+        self.assertEqual(LastDayStatsRecord.objects.count(), 0)
 
 
 class GetHistoryStatsTests(APITestCase):
@@ -185,14 +196,6 @@ class GetHistoryStatsTests(APITestCase):
             ],
         )
 
-    def test_with_no_stats_parameter(self):
-        """Try to get data without specifying the `fields` parameter."""
-
-        self.client.force_login(self.testuser)
-        response = self.client.get(reverse_lazy("daily_stats"), data={}, QUERY_STRING="")
-        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
-        self.assertDictEqual(response.json(), error.MISSING_FIELDS.data)
-
     def test_get_all_data(self):
         """Try to get all data."""
 
@@ -201,45 +204,61 @@ class GetHistoryStatsTests(APITestCase):
         result = [
             get_sample_column_values(
                 columns["daily_stats"],
-                {"positive_small_integer": None, "small_integer": None, "integer": None, "float": None},
+                {
+                    "positive_small_integer": None,
+                    "small_integer": None,
+                    "integer": None,
+                    "float": None,
+                },
                 {"upload_date": "2020-01-01"},
                 datetime_pk=False,
             ),
             get_sample_column_values(
                 columns["daily_stats"],
-                {"positive_small_integer": None, "small_integer": None, "integer": None, "float": None},
+                {
+                    "positive_small_integer": None,
+                    "small_integer": None,
+                    "integer": None,
+                    "float": None,
+                },
                 {"upload_date": "2021-01-01"},
                 datetime_pk=False,
             ),
             get_sample_column_values(
                 columns["daily_stats"],
-                {"positive_small_integer": None, "small_integer": None, "integer": None, "float": None},
+                {
+                    "positive_small_integer": None,
+                    "small_integer": None,
+                    "integer": None,
+                    "float": None,
+                },
                 {"upload_date": "2022-01-01"},
                 datetime_pk=False,
             ),
         ]
 
-        response = self.client.get(reverse_lazy("daily_stats"), data={}, QUERY_STRING="fields=all")
+        response = self.client.get(
+            reverse_lazy("daily_stats"), QUERY_STRING="since=0001-01-01"
+        )
         self.assertEqual(response.status_code, HTTP_200_OK)
         self.assertListEqual(response.json(), result)
 
-    def test_with_extra_stats(self):
+    def test_with_one_extra_stat(self):
         """Try to get data by adding fake field names to the `stats` parameter."""
 
         self.client.force_login(self.testuser)
 
         response = self.client.get(
             reverse_lazy("daily_stats"),
-            data={},
-            QUERY_STRING="fields=all&fields=extra",
+            QUERY_STRING="before=2022-01-01&fields=extra",
         )
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
 
         self.assertIn("Some extra fields were passed:", response.json())
         extra_fields = response.json()["Some extra fields were passed:"]
-        self.assertListEqual(sorted(extra_fields), ["all", "extra"])
+        self.assertListEqual(sorted(extra_fields), ["extra"])
 
-    def test_with_only_extra_stats(self):
+    def test_with_multiple_extra_stats(self):
         """Try to get data by adding only fake field names to the `fields` parameter."""
 
         self.client.force_login(self.testuser)
@@ -248,14 +267,15 @@ class GetHistoryStatsTests(APITestCase):
 
         response = self.client.get(
             reverse_lazy("daily_stats"),
-            data={},
-            QUERY_STRING=f"fields={first_extra_field}&fields={second_extra_field}",
+            QUERY_STRING=f"before=2022-01-01&fields={first_extra_field}&fields={second_extra_field}",
         )
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
 
         self.assertIn("Some extra fields were passed:", response.json())
         extra_fields = response.json()["Some extra fields were passed:"]
-        self.assertListEqual(sorted(extra_fields), [first_extra_field, second_extra_field])
+        self.assertListEqual(
+            sorted(extra_fields), [first_extra_field, second_extra_field]
+        )
 
     def test_before_parameter(self):
         """Try to filter data using the `before` parameter."""
@@ -266,7 +286,6 @@ class GetHistoryStatsTests(APITestCase):
 
         response = self.client.get(
             reverse_lazy("daily_stats"),
-            data={},
             QUERY_STRING="fields=upload_date&before=2021-01-01",
         )
         self.assertEqual(response.status_code, HTTP_200_OK)
@@ -281,7 +300,6 @@ class GetHistoryStatsTests(APITestCase):
 
         response = self.client.get(
             reverse_lazy("daily_stats"),
-            data={},
             QUERY_STRING="fields=upload_date&since=2021-01-01",
         )
         self.assertEqual(response.status_code, HTTP_200_OK)
@@ -296,8 +314,25 @@ class GetHistoryStatsTests(APITestCase):
 
         response = self.client.get(
             reverse_lazy("daily_stats"),
-            data={},
             QUERY_STRING="fields=upload_date&since=2021-01-01&before=2021-01-01",
+        )
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        self.assertListEqual(response.json(), result)
+
+    def test_fields_param(self):
+        """Try to use the `fields` parameter to filter the stats."""
+
+        self.client.force_login(self.testuser)
+
+        result = [
+            {"upload_date": "2020-01-01"},
+            {"upload_date": "2021-01-01"},
+            {"upload_date": "2022-01-01"},
+        ]
+
+        response = self.client.get(
+            reverse_lazy("daily_stats"),
+            QUERY_STRING="fields=upload_date&since=0001-01-01",
         )
         self.assertEqual(response.status_code, HTTP_200_OK)
         self.assertListEqual(response.json(), result)
@@ -341,7 +376,9 @@ class DeleteHistoryStatsTests(APITestCase):
 
         self.client.force_login(user=self.testuser)
 
-        response = self.client.delete(reverse_lazy("daily_stats"), QUERY_STRING="action=x")
+        response = self.client.delete(
+            reverse_lazy("daily_stats"), QUERY_STRING="action=x"
+        )
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json(), error.INVALID_ACTION_PARAM.data)
 
@@ -351,7 +388,9 @@ class DeleteHistoryStatsTests(APITestCase):
         self.client.force_login(user=self.testuser)
         result = {"deleted": 3}
 
-        response = self.client.delete(reverse_lazy("daily_stats"), QUERY_STRING="action=truncate")
+        response = self.client.delete(
+            reverse_lazy("daily_stats"), QUERY_STRING="action=truncate"
+        )
         self.assertEqual(response.status_code, HTTP_200_OK)
         self.assertEqual(response.json(), result)
 
@@ -381,89 +420,6 @@ class DeleteHistoryStatsTests(APITestCase):
         self.assertEqual(response.json(), error.MISSING_DATE_ARG.data)
 
 
-class AddLastHistoryStatsTests(APITestCase):
-    """Tests for adding last history stats."""
-
-    @classmethod
-    def setUpTestData(cls) -> None:
-        """Set up test data."""
-        User.objects.create(
-            username="testuser",
-            password="testuser1!",
-            is_staff=True,
-            is_active=True,
-            is_superuser=True,
-        )
-        cls.testuser = User.objects.get(username="testuser")
-        LastDayStatsRecord(upload_date="2019-01-01").save()
-
-    def test_add_valid_data(self):
-        """Test adding a record with valid data."""
-
-        self.client.force_login(self.testuser)
-
-        data = {"upload_date": "2022-01-01"}
-        result = get_sample_column_values(
-            columns["daily_stats"],
-            {"positive_small_integer": None, "small_integer": None, "integer": None, "float": None},
-            {"upload_date": "2022-01-01"},
-            datetime_pk=False,
-        )
-        url = reverse_lazy("last_day_stats", current_app="solax_registers")
-        response = self.client.post(url, data=data, format="json")
-
-        self.assertEqual(response.status_code, HTTP_201_CREATED)
-        self.assertDictEqual(response.json(), result)
-        self.assertEqual(LastDayStatsRecord.objects.count(), 1)
-
-    def test_with_missing_pk(self):
-        """Test posting data with no timestamp."""
-
-        self.client.force_login(self.testuser)
-
-        url = reverse_lazy("last_day_stats", current_app="solax_registers")
-        response = self.client.post(url, data={}, format="json")
-
-        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
-        self.assertEqual(LastDayStatsRecord.objects.count(), 0)
-
-    def test_with_extra_fields(self):
-        """Test posting data with extra fields."""
-
-        self.client.force_login(self.testuser)
-
-        extra_field = get_a_nonexistent_column()
-        data = {"upload_date": "2020-01-01", extra_field: "extra_value"}
-
-        url = reverse_lazy("last_day_stats", current_app="solax_registers")
-        response = self.client.post(url, data=data, format="json")
-
-        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
-        self.assertEqual(LastDayStatsRecord.objects.count(), 1)
-
-        self.assertIn("Some extra fields were passed:", response.json())
-        extra_fields = response.json()["Some extra fields were passed:"]
-        self.assertListEqual(sorted(extra_fields), [extra_field])
-
-    def test_with_only_extra_fields(self):
-        """Test posting data with only extra fields."""
-
-        self.client.force_login(self.testuser)
-
-        extra_field = get_a_nonexistent_column()
-        data = {extra_field: "extra_value"}
-
-        url = reverse_lazy("last_day_stats", current_app="solax_registers")
-        response = self.client.post(url, data=data, format="json")
-
-        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
-        self.assertEqual(LastDayStatsRecord.objects.count(), 1)
-
-        self.assertIn("Some extra fields were passed:", response.json())
-        extra_fields = response.json()["Some extra fields were passed:"]
-        self.assertListEqual(sorted(extra_fields), [extra_field])
-
-
 class GetLastHistoryStatsTests(APITestCase):
     """Tests for getting last history stats."""
 
@@ -481,15 +437,6 @@ class GetLastHistoryStatsTests(APITestCase):
         cls.testuser = User.objects.get(username="testuser")
         LastDayStatsRecord(upload_date="2020-01-01").save()
 
-    def test_with_no_stats_parameter(self):
-        """Try to get data without specifying the `fields` parameter."""
-
-        self.client.force_login(self.testuser)
-        response = self.client.get(reverse_lazy("last_day_stats"), data={})
-
-        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
-        self.assertDictEqual(response.json(), error.MISSING_FIELDS.data)
-
     def test_get_all_data(self):
         """Try to get all data."""
 
@@ -497,37 +444,21 @@ class GetLastHistoryStatsTests(APITestCase):
 
         result = get_sample_column_values(
             columns["daily_stats"],
-            {"positive_small_integer": None, "small_integer": None, "integer": None, "float": None},
+            {
+                "positive_small_integer": None,
+                "small_integer": None,
+                "integer": None,
+                "float": None,
+            },
             {"upload_date": "2020-01-01"},
             datetime_pk=False,
         )
 
-        response = self.client.get(
-            reverse_lazy("last_day_stats"),
-            data={},
-            QUERY_STRING="fields=all",
-        )
-        self.assertEqual(response.status_code, HTTP_200_OK)
+        response = self.client.get(reverse_lazy("daily_stats"))
         self.assertDictEqual(response.json(), result)
+        self.assertEqual(response.status_code, HTTP_200_OK)
 
     def test_with_extra_stats(self):
-        """Try to get data by adding fake field names to the `fields` parameter."""
-
-        self.client.force_login(self.testuser)
-
-        extra_field = get_a_nonexistent_column()
-        response = self.client.get(
-            reverse_lazy("last_day_stats"),
-            data={},
-            QUERY_STRING=f"fields=all&fields={extra_field}",
-        )
-        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
-
-        self.assertIn("Some extra fields were passed:", response.json())
-        extra_fields = response.json()["Some extra fields were passed:"]
-        self.assertListEqual(sorted(extra_fields), ["all", extra_field])
-
-    def test_with_only_extra_stats(self):
         """Try to get data by adding only fake field names to the `fields` parameter."""
 
         self.client.force_login(self.testuser)
@@ -535,8 +466,7 @@ class GetLastHistoryStatsTests(APITestCase):
         extra_field1 = get_a_nonexistent_column(0)
         extra_field2 = get_a_nonexistent_column(1)
         response = self.client.get(
-            reverse_lazy("last_day_stats"),
-            data={},
+            reverse_lazy("daily_stats"),
             QUERY_STRING=f"fields={extra_field1}&fields={extra_field2}",
         )
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
@@ -544,6 +474,20 @@ class GetLastHistoryStatsTests(APITestCase):
         self.assertIn("Some extra fields were passed:", response.json())
         extra_fields = response.json()["Some extra fields were passed:"]
         self.assertListEqual(sorted(extra_fields), [extra_field1, extra_field2])
+
+    def test_fields_param(self):
+        """Try to use the `fields` parameter to filter the stats."""
+
+        self.client.force_login(self.testuser)
+
+        result = {"upload_date": "2020-01-01"}
+
+        response = self.client.get(
+            reverse_lazy("daily_stats"),
+            QUERY_STRING="fields=upload_date",
+        )
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        self.assertDictEqual(response.json(), result)
 
 
 class TestHealthz(APITestCase):
@@ -553,6 +497,12 @@ class TestHealthz(APITestCase):
         response = self.client.get(reverse_lazy("healthz"))
         self.assertEqual(response.json(), "healthy")
         self.assertEqual(response.status_code, 200)
+
+    def test_home(self):
+        self.client.get("/")
+
+    def test_minute_stats(self):
+        self.client.get(reverse_lazy("minute_stats"))
 
 
 class TestParseColumnInfo(unittest.TestCase):
