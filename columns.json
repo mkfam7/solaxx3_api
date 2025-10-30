@@ -171,7 +171,7 @@
             "length": 7
         },
         {
-            "column_name": "energy_to_grid_today_quantity",
+            "column_name": "total_yield",
             "column_type": "float",
             "nullable": true,
             "default": "N/A",
