@@ -6,14 +6,23 @@ This project implements a Rest API Gateway that manages the data retrieved from 
 > This module was tested with the [solaxx3](https://github.com/mkfam7/solaxx3) module which performed the data retrieval from the solar inverter.
 
 ## Prerequisites
-- django 4.2+
-- python 3.10+
+
+This API recommends the following dependencies:
+
+| Python | Django |
+| ------ | ------ |
+| 3.8    | 4.2    |
+| 3.9    | 4.2    |
+| 3.10   | 4.2+   |
+| 3.11   | 4.2+   |
+| 3.12   | 4.2+   |
+| 3.13   | 4.2+   |
+
+In addition, it requires:
 - openssl
 - bash
 
-
 Project link: [https://github.com/mkfam7/solaxx3_api][project_link]
-
 [project_link]: https://github.com/mkfam7/solaxx3_api
 
 ## Installation
@@ -24,10 +33,15 @@ Run the initial setup:
 bash setup.sh
 ```
 
-During the setup, the user will be prompted for:
-- **username** - the admin username
-- **password** - the password of the admin user
-- **email** - the email where the admin notifications should be sent to
+Arguments:
+
+| Short | Long                | description                                                                                                                                                                                                                                                                               |
+| ----- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| -h    | --help              | Show help                                                                                                                                                                                                                                                                                 |
+| -g    | --generate-password | If --create-user, generate the user's password using openssl. Ignores the API_PASSWORD environment variable.                                                                                                                                                                              |
+| -q    | --quiet             | Do not show any prompts.                                                                                                                                                                                                                                                                  |
+| -n    | --no-user           | Do not create a new user. If missing, takes its credentials from the `API_USERNAME` and `API_PASSWORD` environment variables, and if the variables do not exist prompts the user for missing values. If -q, it will print an error instead. If -g, the user's password will be generated. |
+| -f    |                     | Force create the new user. This will delete any matching user in the database and create the new one.                                                                                                                                                                                     |
 
 The password can be changed from the CLI using the following command:
 ```bash
@@ -37,24 +51,26 @@ python3 manage.py changepassword [USERNAME]
 ## Usage
 
 ### Start the application
-    ```bash
-    bash start.sh
-    ```
-    or
+```bash
+bash start.sh
+```
+or
 
-    ```bash
-    bash start.sh HOSTNAME PORT
-    ```
+```bash
+bash start.sh HOSTNAME PORT
+```
 
-   > **HOSTNAME** - the IP Address or the Hostname of the server where the application is hosted.  
-   > **PORT** - the port on which the application is available.
+- **HOSTNAME** - the IP Address or the Hostname of the server where the application is hosted.  
+- **PORT** - the port on which the application is available.
 
-   If the application was started without parameters, it will become available at http://localhost:8000. Otherwise, it will become available at the location specified by the parameters.
+If the application was started without parameters, it will become available
+at http://localhost:8000. Otherwise, it will become available at the location
+specified by the parameters.
 
 ---
 ### Stop the application
-Fron the console where the Django application is running:  
-Press `Ctrl-C`.
+
+To stop the application, press `Ctrl-C` from the console where the Django application is running.
 
 ---
 ### Customizing the columns in the database
