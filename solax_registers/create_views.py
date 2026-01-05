@@ -12,7 +12,7 @@ from rest_framework.serializers import ModelSerializer
 from rest_framework.views import APIView
 
 from .constants import documentation, error, misc
-from .utils import ResponseException, catch400, remove_keys, set_subtract
+from .utils import ResponseException, catch400, set_subtract
 
 
 def create_views(
