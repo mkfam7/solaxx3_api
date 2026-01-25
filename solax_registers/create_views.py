@@ -143,6 +143,7 @@ def create_views(
 
         @extend_schema(
             summary=docs["post"],
+            request=model_serializer,
             responses={
                 201: model_serializer,
                 400: OpenApiTypes.OBJECT,

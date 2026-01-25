@@ -79,7 +79,9 @@ def _validate_column_type(column_type: Any, column_classes: dict):
 
 def _validate_column_nullable(is_nullable: Any):
     if is_nullable != "N/A" and not isinstance(is_nullable, bool):
-        raise ValueError("Invalid value for 'nullable' key; must be true, false, or 'N/A'")
+        raise ValueError(
+            "Invalid value for 'nullable' key; must be true, false, or 'N/A'"
+        )
 
 
 def _validate_column_length(length: Any):
@@ -119,7 +121,9 @@ def get_sample_column_values(
             result[name] = column_type_fallbacks[column_type]
 
     date_column = "upload_time" if datetime_pk else "upload_date"
-    date_value = column_values.get(date_column, "2022-01-01 00:00" if datetime_pk else "2022-01-01")
+    date_value = column_values.get(
+        date_column, "2022-01-01 00:00" if datetime_pk else "2022-01-01"
+    )
     result[date_column] = date_value
     return result
 
@@ -135,10 +139,15 @@ def read_columns_file():
 
 def get_a_nonexistent_column(index=0):
     letter = ascii_lowercase[index]
-    columns_for_daily_stats = list(map(itemgetter("column_name"), read_columns_file()["daily_stats"]))
+    columns_for_daily_stats = list(
+        map(itemgetter("column_name"), read_columns_file()["daily_stats"])
+    )
     nonexistent_column = columns_for_daily_stats[0]
 
-    while len(columns_for_daily_stats) != 0 and nonexistent_column in columns_for_daily_stats:
+    while (
+        len(columns_for_daily_stats) != 0
+        and nonexistent_column in columns_for_daily_stats
+    ):
         nonexistent_column += letter
 
     if not columns_for_daily_stats:
@@ -147,11 +156,11 @@ def get_a_nonexistent_column(index=0):
 
 
 def catch400(func):
-    @wraps(func)
-    def inner(*args, **kwargs):
-        try:
-            return func(*args, **kwargs)
-        except ResponseException as exc:
-            return exc.args[0]
+    # @wraps(func)
+    # def inner(*args, **kwargs):
+    #     try:
+    #         return func(*args, **kwargs)
+    #     except ResponseException as exc:
+    #         return exc.args[0]
 
-    return inner
+    return func

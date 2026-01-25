@@ -4,19 +4,25 @@ from drf_spectacular.utils import OpenApiExample, OpenApiParameter
 STATS_PARAM = OpenApiParameter(
     name="fields",
     location="query",
-    required=True,
-    description="Fields to return.",
+    required=False,
+    description="The fields to return.",
     style="form",
     explode=True,
     examples=[
         OpenApiExample(
-            name="Ex. 1",
+            name="Using an empty string",
+            summary="Using an empty string",
+            value=[""],
+            description="You can use an empty string to return all fields.",
+        ),
+        OpenApiExample(
+            name="Using 'all'",
             summary="Using 'all'",
             value=["all"],
             description="You can use the word 'all' to return all fields.",
         ),
         OpenApiExample(
-            name="Ex. 2",
+            name="Passing a list of fields",
             summary="Passing list of fields",
             value=["upload_time", "grid_voltage_r"],
             description="Finally, you can pass a list of fields.",
@@ -36,6 +42,12 @@ SINCE_PARAM = OpenApiParameter(
     explode=True,
     examples=[
         OpenApiExample(
+            name="Using an empty string",
+            summary="Using an empty string",
+            value="",
+            description="You can use no value at all to ignore this parameter.",
+        ),
+        OpenApiExample(
             name="Using a datetime value",
             summary="Using a datetime value",
             value="2023-01-01 00:00",
@@ -51,7 +63,7 @@ SINCE_PARAM = OpenApiParameter(
             name="Using 0001-01-01",
             summary="Using 0001-01-01",
             value="0001-01-01",
-            description="You can use the date 0001-01-01 and not use the `before` "
+            description="You can use the date `0001-01-01` and not use the `before` "
             "param to forcefully query the history stats.",
         ),
     ],
@@ -67,6 +79,12 @@ BEFORE_PARAM = OpenApiParameter(
     style="form",
     explode=True,
     examples=[
+        OpenApiExample(
+            name="Using an empty string",
+            summary="Using an empty string",
+            value="",
+            description="You can use no value at all to ignore this parameter.",
+        ),
         OpenApiExample(
             name="Using a datetime value",
             summary="Using a datetime value",
@@ -92,11 +110,17 @@ SINCE_PARAM_WITHOUT_DATETIME = OpenApiParameter(
     explode=True,
     examples=[
         OpenApiExample(
-            name="Example",
+            name="Using an empty string",
+            summary="Using an empty string",
+            value="",
+            description="You can use no value at all to ignore this parameter.",
+        ),
+        OpenApiExample(
+            name="Using a date value",
             summary="Using a date value",
             value="2023-01-01",
             description="You must pass an ISO-8601 date.",
-        )
+        ),
     ],
 )
 
@@ -110,7 +134,13 @@ BEFORE_PARAM_WITHOUT_DATETIME = OpenApiParameter(
     explode=True,
     examples=[
         OpenApiExample(
-            name="Ex. 1",
+            name="Using an empty string",
+            summary="Using an empty string",
+            value="",
+            description="You can use no value at all to ignore this parameter.",
+        ),
+        OpenApiExample(
+            name="Using a date value",
             summary="Using a date value",
             value="2023-01-01",
             description="You must pass an ISO-8601 date.",
@@ -122,7 +152,7 @@ OVERWRITE_PARAM = OpenApiParameter(
     name="overwrite",
     enum=["true", "false"],
     location="query",
-    required=True,
+    required=False,
     description="Controls whether to insert the record anyway, even though it may already exist.",
     style="form",
     explode=True,
@@ -150,14 +180,15 @@ ACTION_PARAM = OpenApiParameter(
     examples=[
         OpenApiExample(
             name="Ex. 1",
-            value="delete_older_than",
             summary="Using delete_older_than",
-            description="Use `delete_older_than` to delete records older than or equal a date given as the first value in `args`.",
+            value="delete_older_than",
+            description="Use `delete_older_than` to delete records older than or equal a date"
+            " given as the first value in `args`.",
         ),
         OpenApiExample(
-            name="Ex. 2",
-            value="truncate",
+            name="Using truncate",
             summary="Using truncate",
+            value="truncate",
             description="Use `truncate` to delete all history.",
         ),
     ],
@@ -167,7 +198,7 @@ ARGS_PARAM = OpenApiParameter(
     name="args",
     many=True,
     location="query",
-    description="All parameters for a delete action.",
+    description="The parameters for the selected action, if any.",
     style="form",
     explode=True,
 )
