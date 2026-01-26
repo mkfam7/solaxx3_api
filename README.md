@@ -22,8 +22,8 @@ In addition, it requires:
 - openssl
 - bash
 
-Project link: [https://github.com/mkfam7/solaxx3_api][project_link]
-[project_link]: https://github.com/mkfam7/solaxx3_api
+Project link: https://github.com/mkfam7/solaxx3_api
+
 
 ## Installation
 
@@ -45,17 +45,17 @@ By default, `USERNAME` is the current username, `$USER`.
 
 ### Starting the application
 
-```bash
+```
 bash start.sh
 ```
 
 or
 
-```bash
+```
 bash start.sh HOSTNAME PORT
 ```
 
-- **HOSTNAME** - the IP address or the hostname of the server where the application is hosted.  
+- **HOSTNAME** - the IP address or hostname of the server where the application is hosted.  
 - **PORT** - the port on which the application is available.
 
 
@@ -77,18 +77,17 @@ Starting with version 1.1.1, the columns in the database can be configured in a 
 specified by the `COLUMNS_FILE` environment variable. If no such variable exists, the fallback
 value is `columns.json`.
 
-The configuration under the `minute_stats` key controls the columns for the endpoint
-`/minute-stats/`, while the `daily_stats` key controls the columns for the endpoint
-`/daily-stats/`.
+The configuration under the `minute_stats` key defines the columns for `/minute-stats/`,
+while the `daily_stats` key defines the columns for `/daily-stats/`.
 
 Each of these keys contains a list of dictionaries, each representing one column.
 Each dictionary is structured as follows:
 
 - `column_name`: The name of the column.
 - `column_type`: The type of the column. Must be either `positive_small_integer`, `small_integer`, `integer`, or `float`.
-- `nullable` (Optional): Whether to store empty values as null in the database.
-- `default` (Optional): Any default value in case the user does not specify any value for a column value.
-- `length` (Optional): The length of a specified field. Recommended for `float` fields.
+- `nullable` (optional): Whether to store empty values as null in the database.
+- `default` (optional): Any default value in case the user does not specify any value for a column value.
+- `length` (optional): The length of a specified field. Recommended for `float` fields.
 
 For the keys `nullable`, `default`, and `length`, a value of `N/A` could be used to indicate an empty value.
 
@@ -98,7 +97,7 @@ For the keys `nullable`, `default`, and `length`, a value of `N/A` could be used
 For administrative tasks, Django provides a useful web application at `http://host:port/admin`.
 
 ### Documentation
-The API endpoint documentation can be found at `http://host:port/swagger-docs/`
+The API endpoint documentation can be found at `http://host:port/swagger-docs/`.
 
 ### Health check
 The API provides a health check endpoint at `http://host:port/healthz`.
@@ -117,7 +116,7 @@ Query parameters:
   `?fields=field1&fields=field2`
 
 
-Examples:
+Other examples:
 
 1. Get all records with all columns:
     `/minute-stats/?since=0001-01-01`
@@ -145,11 +144,10 @@ Query parameters:
 
 #### DELETE
 
-Two actions can be done using a DELETE request: deleting all data or deleting all data older than
-a given date.
+Two actions can be done using a DELETE request: truncating, or deleting all records older than a given date.
 
 The action is specified by the `action` parameter and can be either `truncate` or `delete_older_than`.
-For `delete_older_than`, specify the date to the `args` parameter.
+For `delete_older_than`, specify the timestamp to the `args` parameter.
 
 Examples:
 - `?action=truncate`
