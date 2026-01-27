@@ -72,7 +72,7 @@ echo "Upgrading pip..."
 ${PIP} install --upgrade pip
 
 echo "Installing dependencies..."
-${PIP} install -r requirements.txt || exit 1
+${PIP} install -r "$($PYTHON get_dependency_file.py)" || exit 1
 
 # Generate a Django secret key and make it available
 echo "export SECRET_KEY=$(openssl rand -hex 100)" > .env

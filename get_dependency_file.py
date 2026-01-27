@@ -51,15 +51,11 @@ except (ImportError, ModuleNotFoundError):
     django_version = "latest.txt"
 
 if python_version not in supported_dependencies:
-    print("Error")
-    sys_exit(
-        f"Python {python_version_verbose} is not supported. Please use Python 3.8+."
-    )
+    print(f"Python {python_version_verbose} not supported")
+    sys_exit()
 
 if django_version not in supported_dependencies[python_version]:
-    print("Error")
-    sys_exit(
-        f"Django {VERSION[:2]} is not supported. Please use an appropriate version of Django."
-    )
+    print(f"Django {VERSION[:2]} not supported")
+    sys_exit()
 
-print("python" + python_version_verbose + "/" + django_version)
+print("requirements/python" + python_version_verbose + "/" + django_version)
