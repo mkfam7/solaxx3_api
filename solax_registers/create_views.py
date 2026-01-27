@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from rest_framework.serializers import ModelSerializer
 from rest_framework.views import APIView
 
-from .constants import documentation, error, misc
+from .constants import documentation, response_templates
 from .utils import ResponseException, catch400, set_subtract
 
 
@@ -85,7 +85,7 @@ def create_views(
             model_fields = self._get_model_fields()
             extra_fields = set_subtract(fields, model_fields)
             if extra_fields:
-                error_response = error.extra_fields_passed(extra_fields)
+                error_response = response_templates.extra_fields_passed(extra_fields)
                 raise ResponseException(error_response)
 
         def _get_model_fields(self) -> list:
@@ -164,7 +164,7 @@ def create_views(
 
         def _validate_overwrite(self, overwrite: str) -> bool:
             if overwrite not in ("true", "false"):
-                raise ResponseException(error.INVALID_FORCE_PARAM)
+                raise ResponseException(response_templates.INVALID_FORCE_PARAM)
 
         def _validate_for_extra_fields_in_data(self, data: dict) -> list:
             given_fields = list(data.keys())
@@ -214,7 +214,7 @@ def create_views(
 
         def _delete_older_than_date(self, args: list) -> Response:
             if args == []:
-                return error.MISSING_DATE_ARG
+                return response_templates.MISSING_DATE_ARG
 
             date = args[0]
 
@@ -222,17 +222,17 @@ def create_views(
             queryset = self.model.objects.filter(**filter_params)
 
             no_deleted, _ = queryset.delete()
-            return misc.deleted(no_deleted)
+            return response_templates.deleted(no_deleted)
 
         def _truncate(self, args: list) -> Response:
             no_deleted, _ = self.model.objects.all().delete()
-            return misc.deleted(no_deleted)
+            return response_templates.deleted(no_deleted)
 
         def _validate_action(self, action: str, valid_actions):
             if not action:
-                raise ResponseException(error.MISSING_ACTION_PARAM)
+                raise ResponseException(response_templates.MISSING_ACTION_PARAM)
 
             if action not in valid_actions:
-                raise ResponseException(error.INVALID_ACTION_PARAM)
+                raise ResponseException(response_templates.INVALID_ACTION_PARAM)
 
     return StatsManager

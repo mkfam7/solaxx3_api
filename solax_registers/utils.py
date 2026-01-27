@@ -1,5 +1,5 @@
-import json
 from functools import wraps
+import json
 from operator import itemgetter
 from os import environ
 from string import ascii_lowercase
@@ -156,11 +156,11 @@ def get_a_nonexistent_column(index=0):
 
 
 def catch400(func):
-    # @wraps(func)
-    # def inner(*args, **kwargs):
-    #     try:
-    #         return func(*args, **kwargs)
-    #     except ResponseException as exc:
-    #         return exc.args[0]
+    @wraps(func)
+    def inner(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except ResponseException as exc:
+            return exc.args[0]
 
-    return func
+    return inner
