@@ -2,7 +2,7 @@ name: Django CI
 
 on:
   push:
-    branches: ["main", "develop", "*"]
+    branches: ["main", "develop", "feature/field_rename"]
   pull_request:
     branches: ["main", "develop"]
 
