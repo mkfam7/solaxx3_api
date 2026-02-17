@@ -11,6 +11,9 @@ extra_fields_passed = lambda f: Response(
     status.HTTP_400_BAD_REQUEST,
 )
 
+deleted = lambda no_deleted: Response({"deleted": no_deleted}, status.HTTP_200_OK)
+
+
 INVALID_FORCE_PARAM = Response(
     {"detail": "'overwrite' parameter must be either 'true' or 'false'"},
     status.HTTP_400_BAD_REQUEST,

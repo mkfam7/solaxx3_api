@@ -1,12 +1,10 @@
 """All the models of this app."""
 
-import json
-from os import environ
-
 from django.db import models
 
 from solax_registers.utils import parse_column_info
 from .utils import read_columns_file
+
 
 columns_config = read_columns_file()
 

@@ -8,7 +8,7 @@ from django.urls import reverse_lazy
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST
 from rest_framework.test import APITestCase
 
-from .constants import error
+from .constants import response_templates
 from .models import DailyStatsRecord, LastDayStatsRecord
 from .utils import (
     get_a_nonexistent_column,
@@ -167,7 +167,7 @@ class AddHistoryStatsTests(APITestCase):
         )
 
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.json(), error.INVALID_FORCE_PARAM.data)
+        self.assertEqual(response.json(), response_templates.INVALID_FORCE_PARAM.data)
         self.assertEqual(DailyStatsRecord.objects.count(), 0)
         self.assertEqual(LastDayStatsRecord.objects.count(), 0)
 
@@ -369,7 +369,7 @@ class DeleteHistoryStatsTests(APITestCase):
 
         response = self.client.delete(reverse_lazy("daily_stats"))
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.json(), error.MISSING_ACTION_PARAM.data)
+        self.assertEqual(response.json(), response_templates.MISSING_ACTION_PARAM.data)
 
     def test_deleting_with_nonexistent_action(self):
         """Try to delete data with passing an invalid `action` parameter."""
@@ -380,7 +380,7 @@ class DeleteHistoryStatsTests(APITestCase):
             reverse_lazy("daily_stats"), QUERY_STRING="action=x"
         )
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.json(), error.INVALID_ACTION_PARAM.data)
+        self.assertEqual(response.json(), response_templates.INVALID_ACTION_PARAM.data)
 
     def test_truncate(self):
         """Try to delete all data."""
@@ -417,7 +417,7 @@ class DeleteHistoryStatsTests(APITestCase):
             QUERY_STRING="action=delete_older_than",
         )
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.json(), error.MISSING_DATE_ARG.data)
+        self.assertEqual(response.json(), response_templates.MISSING_DATE_ARG.data)
 
 
 class GetLastHistoryStatsTests(APITestCase):

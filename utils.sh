@@ -22,7 +22,7 @@ get-password() {
     return 0
 
   elif [ $QUIET = 1 ]; then
-    echo "No password has been provided. Remove the -q option or set the API_PASWORD variable." >&2
+    echo "No password has been provided. Remove the -q option or set the API_PASSWORD variable." >&2
     exit 2
 
   else

@@ -100,7 +100,7 @@ if [ $create_user = 1 ]; then
 fi
 
 if [ $create_user = 1 ] && [ $generate_password = 1 ]; then
-  echo "You have created a new user successfully! The following are the credentials:"
+  echo "You have created a new user successfully! The following are your credentials:"
   echo $DJANGO_SUPERUSER_USERNAME
   echo $DJANGO_SUPERUSER_PASSWORD
 fi

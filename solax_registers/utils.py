@@ -1,5 +1,5 @@
-import json
 from functools import wraps
+import json
 from operator import itemgetter
 from os import environ
 from string import ascii_lowercase
@@ -96,13 +96,6 @@ def _filter_args(column_info: dict, args: list):
         if value != "N/A":
             result[arg] = value
     return result
-
-
-def remove_keys(dictionary, keys):
-    copy_dict = {**dictionary}
-    for key in keys:
-        copy_dict.pop(key)
-    return copy_dict
 
 
 def get_sample_column_values(
