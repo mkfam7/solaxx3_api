@@ -22,6 +22,7 @@ except KeyError:
     ERROR = "Could not fetch the secret key. Perhaps you forgot to run 'source .env'?"
     raise KeyError(ERROR) from None
 
+# misc
 DEBUG = False
 ALLOWED_HOSTS = ["*"]
 
@@ -39,6 +40,7 @@ INSTALLED_APPS = [
     # third-party
     "rest_framework",
     "drf_spectacular",
+    "drf_spectacular_sidecar",
 ]
 
 MIDDLEWARE = [
@@ -128,6 +130,9 @@ https://github.com/mkfam7/solaxx3_api?tab=readme-ov-file#rest-api-gateway-for-so
 ).""",
     "VERSION": "2.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
+    "SWAGGER_UI_DIST": "SIDECAR",
+    "SWAGGER_UI_FAVICON_HREF": "SIDECAR",
+    "REDOC_DIST": "SIDECAR",
 }
 SILENCED_SYSTEM_CHECKS = [
     "security.W004",
