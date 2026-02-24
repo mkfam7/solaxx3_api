@@ -7,16 +7,12 @@ This project implements a Rest API Gateway that manages the data retrieved from 
 
 ## Prerequisites
 
-This API recommends the following dependencies:
+Recommended:
+- Python 3.10, 3.11, 3.12, or 3.13
 
-| Python | Django |
-| ------ | ------ |
-| 3.8    | 4.2    |
-| 3.9    | 4.2    |
-| 3.10   | 5.*    |
-| 3.11   | 5.*    |
-| 3.12   | 5.*    |
-| 3.13   | 5.*    |
+Supported (may not receive security fixes from dependencies):
+- Python 3.8 and 3.9
+
 
 In addition, it requires:
 - openssl
