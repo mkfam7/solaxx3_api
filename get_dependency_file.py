@@ -1,4 +1,5 @@
-from sys import version_info, exit as sys_exit
+from sys import exit as sys_exit
+from sys import version_info
 
 python_version = tuple(version_info)[:2]
 python_version_verbose = str(python_version[0]) + "." + str(python_version[1])
@@ -35,8 +36,6 @@ supported_dependencies = {
         "latest.txt",
     ],
     (3, 13): [
-        "django4.2.txt",
-        "django5.0.txt",
         "django5.1.txt",
         "django5.2.txt",
         "latest.txt",

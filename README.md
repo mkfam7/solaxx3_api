@@ -7,14 +7,14 @@ This project implements a Rest API Gateway that manages the data retrieved from 
 
 ## Prerequisites
 
-Recommended:
+**Recommended:**
 - Python 3.10, 3.11, 3.12, or 3.13
 
-Supported (may not receive security fixes from dependencies):
+**Supported (may not receive security fixes from dependencies):**
 - Python 3.8 and 3.9
 
 
-In addition, it requires:
+In addition, the following are required:
 - openssl
 - bash
 
@@ -24,6 +24,11 @@ Project link: https://github.com/mkfam7/solaxx3_api
 ## Installation
 
 Run the initial setup. Run `bash setup.sh --help` to view the existing parameters.
+
+Optionally, set the `DB_PATH` environment variable to the path where the SQLite database
+should be stored.
+
+> Introduced in version 2.0.2.
 
 ```bash
 bash setup.sh
@@ -35,7 +40,7 @@ The password can be changed from the CLI using the following command:
 python3 manage.py changepassword [USERNAME]
 ```
 
-By default, `USERNAME` is the current username, `$USER`.
+`USERNAME` defaults to the current username, as specified by the environment variable `$USER`.
 
 ## Usage
 
@@ -53,6 +58,11 @@ bash start.sh HOSTNAME PORT
 
 - **HOSTNAME** - the IP address or hostname of the server where the application is hosted.  
 - **PORT** - the port on which the application is available.
+
+Optionally, set the `DB_PATH` environment variable to the path where the SQLite database
+should be stored.
+
+> Introduced in version 2.0.2.
 
 
 If the application was started without parameters, it will become available
@@ -157,6 +167,7 @@ Examples:
 
 ## Django configuration considerations
 
-During setup a superuser is created for administrative purposes. Additional users may be created to operate over the same set of data.
+During setup, a superuser is created for administrative purposes. Additional
+users may be created to operate over the same set of data.
 
 The current implementation uses SQLite as a database.
