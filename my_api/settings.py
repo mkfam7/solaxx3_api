@@ -128,7 +128,7 @@ An API that manipulates data read from a solar inverter. For more details on how
 use it, consult [the documentation](\
 https://github.com/mkfam7/solaxx3_api?tab=readme-ov-file#rest-api-gateway-for-solar-inverter\
 ).""",
-    "VERSION": "2.0.1",
+    "VERSION": "2.0.2",
     "SERVE_INCLUDE_SCHEMA": False,
     "SWAGGER_UI_DIST": "SIDECAR",
     "SWAGGER_UI_FAVICON_HREF": "SIDECAR",
