@@ -2,56 +2,62 @@
 
 from django.db import models
 
-from solax_registers.utils import parse_column_info
+from solax_registers.utils import get_model_field_class
+
 from .utils import read_columns_file
 
-
 columns_config = read_columns_file()
+minute_stats_pk = ""
+daily_stats_pk = ""
 
 
 class MinuteStatsRecord(models.Model):
     """Represents every-minute inverter data."""
 
-    upload_time = models.DateTimeField(primary_key=True)
-
     for column_info in columns_config["minute_stats"]:
-        locals()[column_info["column_name"]] = parse_column_info(column_info)
+        if column_info.get("primary_key", None) is True:
+            globals()["minute_stats_pk"] = column_info["column_name"]
+
+        locals()[column_info["column_name"]] = get_model_field_class(column_info)
 
     def __repr__(self):
-        return str(self.upload_time)
+        return str(self.pk)
 
 
 class LastMinuteStatsRecord(models.Model):
     """Represents every-minute inverter data."""
 
-    upload_time = models.DateTimeField()
-
     for column_info in columns_config["minute_stats"]:
-        locals()[column_info["column_name"]] = parse_column_info(column_info)
+        if column_info["column_name"] == minute_stats_pk:
+            del column_info["primary_key"]
+
+        locals()[column_info["column_name"]] = get_model_field_class(column_info)
 
     def __repr__(self):
-        return str(self.upload_time)
+        return str(getattr(self, minute_stats_pk))
 
 
 class DailyStatsRecord(models.Model):
     """Represents daily inverter data."""
 
-    upload_date = models.DateField(primary_key=True)
-
     for column_info in columns_config["daily_stats"]:
-        locals()[column_info["column_name"]] = parse_column_info(column_info)
+        if column_info.get("primary_key", None) is True:
+            globals()["daily_stats_pk"] = column_info["column_name"]
+
+        locals()[column_info["column_name"]] = get_model_field_class(column_info)
 
     def __repr__(self):
-        return str(self.upload_date)
+        return str(self.pk)
 
 
 class LastDayStatsRecord(models.Model):
     """Represents daily inverter data."""
 
-    upload_date = models.DateField()
-
     for column_info in columns_config["daily_stats"]:
-        locals()[column_info["column_name"]] = parse_column_info(column_info)
+        if column_info["column_name"] == daily_stats_pk:
+            del column_info["primary_key"]
+
+        locals()[column_info["column_name"]] = get_model_field_class(column_info)
 
     def __repr__(self):
-        return str(self.upload_date)
+        return str(getattr(self, daily_stats_pk))

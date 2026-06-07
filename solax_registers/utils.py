@@ -3,10 +3,19 @@ import json
 from operator import itemgetter
 from os import environ
 from string import ascii_lowercase
-from typing import Any, Literal
+from typing import Any, Literal, Type
 
 from django.contrib.auth.models import User
 from django.db import models
+
+COLUMN_CLASSES = {
+    "positive_small_integer": models.PositiveSmallIntegerField,
+    "small_integer": models.SmallIntegerField,
+    "integer": models.IntegerField,
+    "float": models.FloatField,
+    "date": models.DateField,
+    "datetime": models.DateTimeField,
+}
 
 
 class ResponseException(Exception):
@@ -33,7 +42,7 @@ def set_subtract(a: list, b: list) -> list:
     return list(diff)
 
 
-def parse_column_info(column_info: dict):
+def get_model_field_class(column_info: dict):
     """
     Return the appropriate Django field class for a column.
 
@@ -48,54 +57,171 @@ def parse_column_info(column_info: dict):
         This exception is raised if the information provided is invalid.
     """
 
-    COLTYPE = "column_type"
-    IS_NULL = "nullable"
-    LENGTH = "length"
-    COLUMN_CLASSES = {
-        "positive_small_integer": models.PositiveSmallIntegerField,
-        "small_integer": models.SmallIntegerField,
-        "integer": models.IntegerField,
-        "float": models.FloatField,
-    }
+    column_info = _set_default_values(
+        column_info,
+        ["column_name", "column_type", "nullable", "length", "primary_key", "default"],
+    )
+    _validate_column_info(column_info)
+    column_class = _get_column_class(column_info["column_type"])
 
-    _validate_column_type(column_info[COLTYPE], COLUMN_CLASSES)
-    _validate_column_nullable(column_info[IS_NULL])
-    _validate_column_length(column_info[LENGTH])
-
-    column_class = COLUMN_CLASSES[column_info[COLTYPE]]
     kwargs = {**column_info}
-    kwargs["null"] = kwargs.pop("nullable")
-    kwargs["max_length"] = kwargs.pop("length")
-    kwargs = _filter_args(kwargs, ["null", "default", "max_length"])
+    kwargs.pop("column_name")
+    kwargs.pop("column_type")
+    _rename(kwargs, old="nullable", new="null")
+    _rename(kwargs, old="length", new="max_length")
+    kwargs = _remove_fields_with_defaults(kwargs)
 
     return column_class(**kwargs)
 
 
-def _validate_column_type(column_type: Any, column_classes: dict):
-    if column_type not in column_classes:
-        error_msg = f"Invalid column type; must be {'or'.join(column_classes.keys())}"
-        raise ValueError(error_msg)
+def _validate_column_info(column_info: dict):
+    column_type = column_info.get("column_type", "N/A")
+    _validate_column_type(column_type)
+
+    is_null = column_info.get("nullable", "N/A")
+    _validate_boolean(is_null, field_name="nullable")
+
+    is_pk = column_info.get("primary_key", "N/A")
+    _validate_boolean(is_pk, field_name="primary_key")
+
+    length = column_info.get("length", "N/A")
+    _validate_length(length)
 
 
-def _validate_column_nullable(is_nullable: Any):
-    if is_nullable != "N/A" and not isinstance(is_nullable, bool):
-        raise ValueError(
-            "Invalid value for 'nullable' key; must be true, false, or 'N/A'"
-        )
+def _validate_column_type(column_type):
+    if column_type == "N/A":
+        raise ValueError("Column type must be specified")
+
+    if column_type not in COLUMN_CLASSES:
+        choices = ", ".join(COLUMN_CLASSES.keys())
+        raise ValueError(f"Column type should be one of: {choices}")
 
 
-def _validate_column_length(length: Any):
+def _validate_boolean(value, field_name):
+    if value not in (True, False, "N/A"):
+        raise ValueError(f"{field_name} should be true, false or N/A")
+
+
+def _validate_length(length: Any):
     if length != "N/A" and (not isinstance(length, int) or length < 1):
-        raise ValueError("Invalid column length; must be a positive number")
+        raise ValueError("Invalid length; must be a positive number")
 
 
-def _filter_args(column_info: dict, args: list):
+def _set_default_values(column_info: dict, args: list):
     result = {}
     for arg in args:
+        result[arg] = column_info.get(arg, "N/A")
+    return result
+
+
+def _remove_fields_with_defaults(column_info: dict):
+    result = {}
+    for arg in column_info.keys():
         value = column_info[arg]
         if value != "N/A":
             result[arg] = value
     return result
+
+
+def _get_column_class(column_type: str) -> Type[models.Model]:
+    return COLUMN_CLASSES[column_type]
+
+
+def _rename(d: dict, old: str, new: str) -> None:
+    d[new] = d.pop(old)
+
+
+# def get_model_field_class(column_info: dict):
+#     """
+#     Return the appropriate Django field class for a column.
+
+#     Parameters
+#     ----------
+#     column_info : dict
+#         The information for a column.
+
+#     Raises
+#     ------
+#     ValueError
+#         This exception is raised if the information provided is invalid.
+#     """
+
+#     column_type = column_info.get("column_type", "N/A")
+#     is_null = column_info.get("nullable", "N/A")
+#     length = column_info.get("length", "N/A")
+#     is_primary_key = column_info.get("primary_key", "N/A")
+
+#     COLUMN_CLASSES = {
+#         "positive_small_integer": models.PositiveSmallIntegerField,
+#         "small_integer": models.SmallIntegerField,
+#         "integer": models.IntegerField,
+#         "float": models.FloatField,
+#         "date": models.DateField,
+#         "datetime": models.DateTimeField,
+#     }
+
+#     _validate_column_type(column_type, COLUMN_CLASSES)
+#     _validate_nullable_field(is_null)
+#     _validate_length_field(length)
+#     _validate_primary_key_field(is_primary_key)
+
+#     if column_type in ("date", "datetime"):
+#         _validate_nullable_for_date_datetime(is_null)
+
+#     column_class = COLUMN_CLASSES[column_type]
+#     kwargs = {**column_info}
+#     kwargs["null"] = kwargs.pop("nullable")
+#     kwargs["max_length"] = kwargs.pop("length")
+#     kwargs = _remove_fields_with_defaults(
+#         kwargs,
+#         [
+#             "null",
+#             "default",
+#             "max_length",
+#             "primary_key",
+#         ],
+#     )
+#     return column_class(**kwargs)
+
+
+# def _validate_primary_key_field(primary_key: Any):
+#     if primary_key not in ("N/A", True):
+#         raise ValueError(
+#             "The field 'primary_key' can only be `true` or not specified at all"
+#         )
+
+
+# def _validate_nullable_for_date_datetime(is_nullable: Union[bool, Literal["N/A"]]):
+#     if is_nullable != "N/A":
+#         raise ValueError("The key 'nullable' cannot be used in conjunction \
+#             with a 'date' or 'datetime' column")
+
+
+# def _validate_column_type(column_type: Any, column_classes: dict):
+#     if column_type not in column_classes:
+#         error_msg = f"Invalid column type; must be {'or'.join(column_classes.keys())}"
+#         raise ValueError(error_msg)
+
+
+# def _validate_nullable_field(is_nullable: Any):
+#     if is_nullable != "N/A" and not isinstance(is_nullable, bool):
+#         raise ValueError(
+#             "Invalid value for 'nullable' key; must be true, false, or 'N/A'"
+#         )
+
+
+# def _validate_length_field(length: Any):
+#     if length != "N/A" and (not isinstance(length, int) or length < 1):
+#         raise ValueError("Invalid column length; must be a positive number")
+
+
+# def _remove_fields_with_defaults(column_info: dict, args: list):
+#     result = {}
+#     for arg in args:
+#         value = column_info.get(arg, "N/A")
+#         if value != "N/A":
+#             result[arg] = value
+#     return result
 
 
 def get_sample_column_values(
