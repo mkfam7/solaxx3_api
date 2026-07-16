@@ -10,7 +10,7 @@ This project implements a Rest API Gateway that manages the data retrieved from 
 **Recommended:**
 - Python 3.10, 3.11, 3.12, or 3.13
 
-**Supported (may not receive security fixes from dependencies):**
+**Supported but not recommended:**
 - Python 3.8 and 3.9
 
 
