@@ -1,60 +1,68 @@
 from sys import exit as sys_exit
 from sys import version_info
+from os import listdir
+from pathlib import Path
 
-python_version = tuple(version_info)[:2]
-python_version_verbose = str(python_version[0]) + "." + str(python_version[1])
 
-supported_dependencies = {
-    (3, 8): ["django4.2.txt", "latest.txt"],
-    (3, 9): ["django4.2.txt", "latest.txt"],
-    (3, 10): [
-        "django4.2.txt",
-        "django5.0.txt",
-        "django5.1.txt",
-        "django5.2.txt",
-        "latest.txt",
-    ],
-    (3, 10): [
-        "django4.2.txt",
-        "django5.0.txt",
-        "django5.1.txt",
-        "django5.2.txt",
-        "latest.txt",
-    ],
-    (3, 11): [
-        "django4.2.txt",
-        "django5.0.txt",
-        "django5.1.txt",
-        "django5.2.txt",
-        "latest.txt",
-    ],
-    (3, 12): [
-        "django4.2.txt",
-        "django5.0.txt",
-        "django5.1.txt",
-        "django5.2.txt",
-        "latest.txt",
-    ],
-    (3, 13): [
-        "django5.1.txt",
-        "django5.2.txt",
-        "latest.txt",
-    ],
-}
+def get_python_version():
+    return tuple(version_info)[:2]
 
-try:
-    from django import VERSION
 
-    django_version = f"django{VERSION[0]}.{VERSION[1]}.txt"
-except (ImportError, ModuleNotFoundError):
-    django_version = "latest.txt"
+def get_django_version():
+    try:
+        from django import VERSION
 
-if python_version not in supported_dependencies:
+        return VERSION[:2]
+
+    except (ImportError, ModuleNotFoundError):
+        return max(get_django_versions(get_python_version()))
+
+
+def get_python_versions():
+    contents = listdir("requirements")
+    without_prefix = map(lambda x: x.removeprefix("python"), contents)
+    return tuple(sorted(map(to_version_tuple, without_prefix)))
+
+
+def get_django_versions(python_version):
+    s = "python" + ".".join(map(str, python_version))
+    contents = listdir(str(Path("requirements") / s))
+    without_prefix_suffix = map(
+        lambda x: x.removeprefix("django").removesuffix(".txt"), contents
+    )
+    return tuple(sorted(map(to_version_tuple, without_prefix_suffix)))
+
+
+def to_version_tuple(version):
+    return tuple(map(int, version.split(".")))
+
+
+def to_version_string(version):
+    return ".".join(map(str, version))
+
+
+python_version = get_python_version()
+python_version_verbose = to_version_string(python_version)
+python_versions = get_python_versions()
+
+
+if python_version not in python_versions:
     print(f"Python {python_version_verbose} not supported")
-    sys_exit()
+    sys_exit(1)
 
-if django_version not in supported_dependencies[python_version]:
-    print(f"Django {VERSION[:2]} not supported")
-    sys_exit()
+django_version = get_django_version()
+django_version_verbose = to_version_string(django_version)
+django_versions = get_django_versions(python_version)
 
-print("requirements/python" + python_version_verbose + "/" + django_version)
+
+if django_version not in django_versions:
+    print(f"Django {django_version_verbose} not supported")
+    sys_exit(1)
+
+print(
+    "requirements/python"
+    + python_version_verbose
+    + "/django"
+    + django_version_verbose
+    + ".txt"
+)
