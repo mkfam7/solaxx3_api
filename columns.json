@@ -8,9 +8,7 @@
     {
       "column_name": "inverter_status",
       "column_type": "positive_small_integer",
-      "nullable": "N/A",
-      "default": 0,
-      "length": "N/A"
+      "default": 0
     },
     {
       "column_name": "grid_voltage_r",
