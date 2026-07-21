@@ -20,16 +20,17 @@ def get_django_version():
 
 def get_python_versions():
     contents = listdir("requirements")
-    without_prefix = map(lambda x: x.removeprefix("python"), contents)
+    without_prefix = map(lambda x: x[6:], contents)
     return tuple(sorted(map(to_version_tuple, without_prefix)))
 
 
 def get_django_versions(python_version):
+    DJANGO = 7
+    TXT = -3
+
     s = "python" + ".".join(map(str, python_version))
     contents = listdir(str(Path("requirements") / s))
-    without_prefix_suffix = map(
-        lambda x: x.removeprefix("django").removesuffix(".txt"), contents
-    )
+    without_prefix_suffix = map(lambda x: x[DJANGO:TXT], contents)
     return tuple(sorted(map(to_version_tuple, without_prefix_suffix)))
 
 
