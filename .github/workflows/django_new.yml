@@ -1,0 +1,36 @@
+name: Django CI
+
+on:
+  push:
+    branches: ["main", "develop"]
+  pull_request:
+    branches: ["main", "develop"]
+
+jobs:
+  build-with-python-38:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        django-version: [4.2]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test API gateway
+        uses: mkfam7/solaxx3_api@HEAD
+        with:
+          python-version: 3.8
+          django-version: ${{ matrix.django-version }}
+
+  build-with-python-39:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        django-version: [4.2]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test API gateway
+        uses: mkfam7/solaxx3_api@HEAD
+        with:
+          python-version: 3.8
+          django-version: ${{ matrix.django-version }}
