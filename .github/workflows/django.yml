@@ -2,12 +2,12 @@ name: Django CI
 
 on:
   push:
-    branches: ["main", "develop"]
+    branches: ["main", "develop", "feature/columns_json_fix"]
   pull_request:
     branches: ["main", "develop"]
 
 jobs:
-  build-with-python-38:
+  test-with-python-38:
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 20
@@ -22,7 +22,7 @@ jobs:
           python-version: "3.8"
           django-version: ${{ matrix.django-version }}
 
-  build-with-python-39:
+  test-with-python-39:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -37,7 +37,7 @@ jobs:
           python-version: "3.9"
           django-version: ${{ matrix.django-version }}
 
-  build-with-python-310:
+  test-with-python-310:
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 20
@@ -52,7 +52,7 @@ jobs:
           python-version: "3.10"
           django-version: ${{ matrix.django-version }}
 
-  build-with-python-311:
+  test-with-python-311:
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 20
@@ -67,7 +67,7 @@ jobs:
           python-version: "3.11"
           django-version: ${{ matrix.django-version }}
 
-  build-with-python-312:
+  test-with-python-312:
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 20
@@ -82,7 +82,7 @@ jobs:
           python-version: "3.12"
           django-version: ${{ matrix.django-version }}
 
-  build-with-python-313:
+  test-with-python-313:
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 20
@@ -97,7 +97,7 @@ jobs:
           python-version: "3.13"
           django-version: ${{ matrix.django-version }}
 
-  build-with-python-314:
+  test-with-python-314:
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 20
@@ -111,3 +111,18 @@ jobs:
         with:
           python-version: "3.14"
           django-version: ${{ matrix.django-version }}
+
+  test-with-latest-django:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 20
+      fail-fast: false
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test API gateway
+        uses: mkfam7/solaxx3_api@ff4bbe2fe44f02a0041a8cdfd36ca5bef84fdf73
+        with:
+          python-version: ${{ matrix.python-version }}
+          test-latest: true
