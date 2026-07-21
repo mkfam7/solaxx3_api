@@ -46,7 +46,7 @@ jobs:
       - name: Test API gateway
         uses: mkfam7/solaxx3_api@cd71d1311c85eaa92039221461f17526008aac60
         with:
-          python-version: 3.10
+          python-version: "3.10"
           django-version: ${{ matrix.django-version }}
 
   build-with-python-311:
