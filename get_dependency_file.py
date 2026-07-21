@@ -31,7 +31,6 @@ def get_django_versions(python_version):
 
     s = "python" + ".".join(map(str, python_version))
     contents = listdir(str(Path("requirements") / s))
-    breakpoint()
     without_prefix_suffix = map(lambda x: x[DJANGO:TXT], contents)
     return tuple(sorted(map(to_version_tuple, without_prefix_suffix)))
 
