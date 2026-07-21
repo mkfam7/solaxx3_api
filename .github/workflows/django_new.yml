@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Test API gateway
-        uses: mkfam7/solaxx3_api@cd71d1311c85eaa92039221461f17526008aac60
+        uses: mkfam7/solaxx3_api@7421a9ca2bf1bf1e33c1c9cf068584792ed15de1
         with:
           python-version: "3.8"
           django-version: ${{ matrix.django-version }}
@@ -30,7 +30,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Test API gateway
-        uses: mkfam7/solaxx3_api@cd71d1311c85eaa92039221461f17526008aac60
+        uses: mkfam7/solaxx3_api@7421a9ca2bf1bf1e33c1c9cf068584792ed15de1
         with:
           python-version: "3.9"
           django-version: ${{ matrix.django-version }}
@@ -44,7 +44,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Test API gateway
-        uses: mkfam7/solaxx3_api@cd71d1311c85eaa92039221461f17526008aac60
+        uses: mkfam7/solaxx3_api@7421a9ca2bf1bf1e33c1c9cf068584792ed15de1
         with:
           python-version: "3.10"
           django-version: ${{ matrix.django-version }}
@@ -58,7 +58,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Test API gateway
-        uses: mkfam7/solaxx3_api@cd71d1311c85eaa92039221461f17526008aac60
+        uses: mkfam7/solaxx3_api@7421a9ca2bf1bf1e33c1c9cf068584792ed15de1
         with:
           python-version: "3.11"
           django-version: ${{ matrix.django-version }}
@@ -72,7 +72,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Test API gateway
-        uses: mkfam7/solaxx3_api@cd71d1311c85eaa92039221461f17526008aac60
+        uses: mkfam7/solaxx3_api@7421a9ca2bf1bf1e33c1c9cf068584792ed15de1
         with:
           python-version: "3.12"
           django-version: ${{ matrix.django-version }}
@@ -86,7 +86,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Test API gateway
-        uses: mkfam7/solaxx3_api@feature/columns_json_fix
+        uses: mkfam7/solaxx3_api@7421a9ca2bf1bf1e33c1c9cf068584792ed15de1
         with:
           python-version: "3.13"
           django-version: ${{ matrix.django-version }}
@@ -100,7 +100,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Test API gateway
-        uses: mkfam7/solaxx3_api@feature/columns_json_fix
+        uses: mkfam7/solaxx3_api@7421a9ca2bf1bf1e33c1c9cf068584792ed15de1
         with:
           python-version: "3.14"
           django-version: ${{ matrix.django-version }}
