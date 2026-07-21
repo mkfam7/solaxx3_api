@@ -68,7 +68,7 @@ PIP="python3 -m pip"
 
 # Install required packages
 echo "Upgrading pip..."
-${PIP} install --upgrade pip
+# ${PIP} install --upgrade pip
 
 echo "Installing dependencies..."
 ${PIP} install -r "$($PYTHON get_dependency_file.py)" || exit 1

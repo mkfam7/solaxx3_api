@@ -11,14 +11,14 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        django-version: [4.2]
+        django-version: ["4.2"]
 
     steps:
       - uses: actions/checkout@v4
       - name: Test API gateway
         uses: mkfam7/solaxx3_api@cd71d1311c85eaa92039221461f17526008aac60
         with:
-          python-version: 3.8
+          python-version: "3.8"
           django-version: ${{ matrix.django-version }}
 
   build-with-python-39:
@@ -26,13 +26,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        django-version: [4.2]
+        django-version: ["4.2"]
     steps:
       - uses: actions/checkout@v4
       - name: Test API gateway
         uses: mkfam7/solaxx3_api@cd71d1311c85eaa92039221461f17526008aac60
         with:
-          python-version: 3.9
+          python-version: "3.9"
           django-version: ${{ matrix.django-version }}
 
   build-with-python-310:
@@ -40,7 +40,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        django-version: [4.2, "5.0", 5.1, 5.2]
+        django-version: ["4.2", "5.0", "5.1", "5.2"]
     steps:
       - uses: actions/checkout@v4
       - name: Test API gateway
@@ -54,13 +54,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        django-version: [4.2, "5.0", 5.1, 5.2]
+        django-version: ["4.2", "5.0", "5.1", "5.2"]
     steps:
       - uses: actions/checkout@v4
       - name: Test API gateway
         uses: mkfam7/solaxx3_api@cd71d1311c85eaa92039221461f17526008aac60
         with:
-          python-version: 3.11
+          python-version: "3.11"
           django-version: ${{ matrix.django-version }}
 
   build-with-python-312:
@@ -68,13 +68,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        django-version: [4.2, "5.0", 5.1, 5.2, "6.0"]
+        django-version: ["4.2", "5.0", "5.1", "5.2", "6.0"]
     steps:
       - uses: actions/checkout@v4
       - name: Test API gateway
         uses: mkfam7/solaxx3_api@cd71d1311c85eaa92039221461f17526008aac60
         with:
-          python-version: 3.12
+          python-version: "3.12"
           django-version: ${{ matrix.django-version }}
 
   build-with-python-313:
@@ -82,13 +82,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        django-version: [5.1, 5.2, "6.0"]
+        django-version: ["5.1", "5.2", "6.0"]
     steps:
       - uses: actions/checkout@v4
       - name: Test API gateway
-        uses: mkfam7/solaxx3_api@cd71d1311c85eaa92039221461f17526008aac60
+        uses: mkfam7/solaxx3_api@feature/columns_json_fix
         with:
-          python-version: 3.13
+          python-version: "3.13"
           django-version: ${{ matrix.django-version }}
 
   build-with-python-314:
@@ -96,11 +96,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        django-version: [5.2, "6.0"]
+        django-version: ["5.2", "6.0"]
     steps:
       - uses: actions/checkout@v4
       - name: Test API gateway
-        uses: mkfam7/solaxx3_api@cd71d1311c85eaa92039221461f17526008aac60
+        uses: mkfam7/solaxx3_api@feature/columns_json_fix
         with:
-          python-version: 3.14
+          python-version: "3.14"
           django-version: ${{ matrix.django-version }}
