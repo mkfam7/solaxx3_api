@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Test API gateway
-        uses: mkfam7/solaxx3_api@HEAD
+        uses: mkfam7/solaxx3_api@cd71d1311c85eaa92039221461f17526008aac60
         with:
           python-version: 3.8
           django-version: ${{ matrix.django-version }}
