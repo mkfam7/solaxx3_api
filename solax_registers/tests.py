@@ -13,7 +13,7 @@ from .models import DailyStatsRecord, LastDayStatsRecord
 from .utils import (
     get_a_nonexistent_column,
     get_sample_column_values,
-    parse_column_info,
+    get_model_field_class,
     read_columns_file,
 )
 
@@ -490,8 +490,8 @@ class GetLastHistoryStatsTests(APITestCase):
         self.assertDictEqual(response.json(), result)
 
 
-class TestHealthz(APITestCase):
-    "Tests for the healthz endpoint"
+class TestEndpoints(APITestCase):
+    "Tests for various endpoints"
 
     def test_healthz(self):
         response = self.client.get(reverse_lazy("healthz"))
@@ -501,8 +501,14 @@ class TestHealthz(APITestCase):
     def test_home(self):
         self.client.get("/")
 
+    def test_docs(self):
+        self.client.get("/docs/")
+
     def test_minute_stats(self):
         self.client.get(reverse_lazy("minute_stats"))
+
+    def test_solax_daily_details(self):
+        self.client.get(reverse_lazy("daily_details"))
 
 
 class TestParseColumnInfo(unittest.TestCase):
@@ -510,7 +516,7 @@ class TestParseColumnInfo(unittest.TestCase):
     def test_parse_with_invalid_type(self):
         "Try parsing column info with an invalid type."
 
-        parse_column_info(
+        get_model_field_class(
             {
                 "column_name": "inverter_status",
                 "column_type": "sample",
@@ -523,7 +529,7 @@ class TestParseColumnInfo(unittest.TestCase):
     def test_parse_with_valid_type(self):
         "Try parsing column info with a valid type."
 
-        parse_column_info(
+        get_model_field_class(
             {
                 "column_name": "inverter_status",
                 "column_type": "integer",
@@ -537,7 +543,7 @@ class TestParseColumnInfo(unittest.TestCase):
     def test_parse_with_invalid_nullable(self):
         "Try parsing column info with an invalid nullable field."
 
-        parse_column_info(
+        get_model_field_class(
             {
                 "column_name": "inverter_status",
                 "column_type": "integer",
@@ -550,7 +556,7 @@ class TestParseColumnInfo(unittest.TestCase):
     def test_parse_with_valid_nullable(self):
         "Try parsing column info with a valid nullable field."
 
-        parse_column_info(
+        get_model_field_class(
             {
                 "column_name": "inverter_status",
                 "column_type": "integer",
@@ -563,7 +569,7 @@ class TestParseColumnInfo(unittest.TestCase):
     def test_parse_with_na_nullable(self):
         "Try parsing column info with an 'N/A' value for the nullable field."
 
-        parse_column_info(
+        get_model_field_class(
             {
                 "column_name": "inverter_status",
                 "column_type": "integer",
@@ -577,7 +583,7 @@ class TestParseColumnInfo(unittest.TestCase):
     def test_parse_with_string_length(self):
         "Try parsing column info with an invalid column length."
 
-        parse_column_info(
+        get_model_field_class(
             {
                 "column_name": "inverter_status",
                 "column_type": "integer",
@@ -590,7 +596,7 @@ class TestParseColumnInfo(unittest.TestCase):
     def test_parse_with_na_length(self):
         "Try parsing column info with an empty value for length."
 
-        parse_column_info(
+        get_model_field_class(
             {
                 "column_name": "inverter_status",
                 "column_type": "integer",
@@ -604,7 +610,7 @@ class TestParseColumnInfo(unittest.TestCase):
     def test_parse_with_neg_length(self):
         "Try parsing column info with a negative length."
 
-        parse_column_info(
+        get_model_field_class(
             {
                 "column_name": "inverter_status",
                 "column_type": "integer",
@@ -618,7 +624,7 @@ class TestParseColumnInfo(unittest.TestCase):
     def test_parse_with_0_length(self):
         "Try parsing column info with length=0."
 
-        parse_column_info(
+        get_model_field_class(
             {
                 "column_name": "inverter_status",
                 "column_type": "integer",
@@ -631,7 +637,7 @@ class TestParseColumnInfo(unittest.TestCase):
     def test_parse_with_positive_length(self):
         "Try parsing column info with a valid length."
 
-        parse_column_info(
+        get_model_field_class(
             {
                 "column_name": "inverter_status",
                 "column_type": "integer",
@@ -639,4 +645,11 @@ class TestParseColumnInfo(unittest.TestCase):
                 "default": 0,
                 "length": 1,
             }
+        )
+
+    def test_parse_with_excluded_fields(self):
+        "Try parsing column info with excluded fields, i.e. without N/A."
+
+        get_model_field_class(
+            {"column_name": "inverter_status", "column_type": "integer"}
         )

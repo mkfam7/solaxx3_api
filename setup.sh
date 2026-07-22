@@ -4,7 +4,7 @@ source utils.sh
 
 print-help() {
   echo "\
-Usage: $0 [-h|--help] [-g|--generate-password] [-q|--quiet] [-n|--no-user]
+Usage: $0 [-h|--help] [-g|--generate-password] [-q|--quiet] [-n|--no-user] [-f|--force-create]
 
 Options:
     -h, --help
@@ -20,10 +20,12 @@ Options:
         and if the variable does not exist prompts the user for missing
         values. If -q, it will print an error instead. If -g, the user's
         password will be generated.
+    -f, --force-create
+        Force create the new user. This will overwrite any matching user in the database.
 "
 }
 
-ARGS=$(getopt -o hqgn --long help,quiet,generate-password,no-user -n "$0" -- "$@")
+ARGS=$(getopt -o hqgnf --long help,quiet,generate-password,no-user,force-create -n "$0" -- "$@")
 if [ $? -ne 0 ];
   then print-help | head -n 1; exit 1
 fi
@@ -33,6 +35,7 @@ eval set -- "$ARGS"
 quiet=0
 generate_password=0
 create_user=1
+overwrite_param=""
 
 while true; do
   case "$1" in
@@ -48,6 +51,9 @@ while true; do
     -n|--no-user)
       create_user=0
       shift ;;
+    -f|--force-create)
+      overwrite_param="-f"
+      shift ;;
     --)
       shift
       break ;;
@@ -58,7 +64,7 @@ while true; do
 done
 
 PYTHON=python3
-PIP=pip3
+PIP="python3 -m pip"
 
 # Install required packages
 echo "Upgrading pip..."
@@ -88,7 +94,7 @@ if [ $create_user = 1 ]; then
 
   ${PYTHON} manage.py createsuperuser \
     --email test@example.com \
-    --no-input || exit 1
+    --no-input $overwrite_param || exit 1
 fi
 
 # Collect the Django static files

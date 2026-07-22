@@ -1,12 +1,161 @@
 <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Rest API gateway version {{ version }}!</title>
 
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --background: linear-gradient(180deg, #f8fafc 0%, #eef4ff 100%);
+            --card: #ffffff;
+            --border: #e5e7eb;
+            --shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+            --radius: 14px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: var(--text);
+            background: var(--background);
+        }
+
+        .container {
+            width: min(900px, 100%);
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 3rem;
+            text-align: center;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 700;
+            letter-spacing: -0.03em;
+        }
+
+        .subtitle {
+            margin: 0.75rem 0 0;
+            font-size: 1.1rem;
+            color: var(--muted);
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2.5rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 220px;
+            padding: 1rem 1.6rem;
+            border-radius: 10px;
+            background: var(--primary);
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 600;
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.25);
+            transition:
+                background-color 0.2s ease,
+                transform 0.15s ease,
+                box-shadow 0.2s ease;
+        }
+
+        .btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 22px rgba(37, 99, 235, 0.35);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:focus-visible {
+            outline: 3px solid rgba(37, 99, 235, 0.35);
+            outline-offset: 3px;
+        }
+
+        .version {
+            margin-top: 2.5rem;
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 2rem 1.5rem;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                min-width: 0;
+            }
+        }
+    </style>
+</head>
 <body>
-    <h1>Welcome to Rest API Gateway for Solar Inverter {{ version }}!</h1>
-    <p>For more on how to use this API, see on <a
-            href="https://github.com/mkfam7/solaxx3_api?tab=readme-ov-file#usage">Github</a>.
+
+<div class="container">
+    <h1>Welcome</h1>
+
+    <p class="subtitle">
+        REST API Gateway <strong>{{ version }}</strong>
     </p>
-    <p>For a endpoint reference guide, click <a href="/docs/">here</a>.</p>
-    <p>For a sketch of this version's release notes, click <a
-            href="https://github.com/mkfam7/solaxx3_api/releases/tag/{{ version }}">here</a>.</p>
-    <p>To log in to the administration application, go to <a href="/admin/">/admin/</a>.</p>
+
+    <div class="actions">
+        <a class="btn" href="https://github.com/mkfam7/solaxx3_api?tab=readme-ov-file#usage" target="_blank" rel="noopener noreferrer">
+            Docs on GitHub
+        </a>
+
+        <a class="btn" href="https://github.com/mkfam7/solaxx3_api/issues/new" target="_blank" rel="noopener noreferrer">
+            Report an issue
+        </a>
+
+        <a class="btn" href="https://github.com/mkfam7/solaxx3_api/issues/new" target="_blank" rel="noopener noreferrer">
+            Release notes
+        </a>
+
+        <a class="btn" href="/admin/">
+            Admin web interface
+        </a>
+
+        <a class="btn" href="/docs/">
+            View &amp; try endpoints
+        </a>
+    </div>
+
+    <div class="version">
+        Version {{ version }}
+    </div>
+</div>
+
 </body>
+</html>

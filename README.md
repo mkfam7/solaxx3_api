@@ -8,10 +8,10 @@ This project implements a Rest API Gateway that manages the data retrieved from 
 ## Prerequisites
 
 **Recommended:**
-- Python 3.10, 3.11, 3.12, or 3.13
+- Python 3.10, 3.11, 3.12, 3.13, 3.14
 
-**Supported (may not receive security fixes from dependencies):**
-- Python 3.8 and 3.9
+**Supported but not recommended:**
+- Python 3.8, 3.9
 
 
 In addition, the following are required:
@@ -23,7 +23,7 @@ Project link: https://github.com/mkfam7/solaxx3_api
 
 ## Installation
 
-Run the initial setup. Run `bash setup.sh --help` to view the existing parameters.
+Run the initial setup. Run `bash setup.sh --help` to view all features and parameters.
 
 Optionally, set the `DB_PATH` environment variable to the path where the SQLite database
 should be stored.
@@ -34,25 +34,27 @@ should be stored.
 bash setup.sh
 ```
 
+If the script prints the error 'Username is already taken', try passing the `-f` parameter to `setup.sh`. See more in the program's help.
+
 The password can be changed from the CLI using the following command:
 
 ```bash
 python3 manage.py changepassword [USERNAME]
 ```
 
-`USERNAME` defaults to the current username, as specified by the environment variable `$USER`.
+`USERNAME` defaults to the value of the environment variable `$USER`.
 
 ## Usage
 
 ### Starting the application
 
-```
+```bash
 bash start.sh
 ```
 
 or
 
-```
+```bash
 bash start.sh HOSTNAME PORT
 ```
 
@@ -69,7 +71,7 @@ If the application was started without parameters, it will become available
 at http://localhost:8000. Otherwise, it will become available at the location
 specified by the parameters.
 
-Run `bash start.sh --help` for additional information.
+Run `bash start.sh --help` for additional parameters and features.
 
 ---
 ### Stopping the application
@@ -94,8 +96,11 @@ Each dictionary is structured as follows:
 - `nullable` (optional): Whether to store empty values as null in the database.
 - `default` (optional): Any default value in case the user does not specify any value for a column value.
 - `length` (optional): The length of a specified field. Recommended for `float` fields.
+- `primary_key` (optional): Whether the column is the primary key or not. For the API to work, a field with `primary_key` set to `true` should be either `date` or `datetime`.
 
 For the keys `nullable`, `default`, and `length`, a value of `N/A` could be used to indicate an empty value.
+
+Starting with version 2.1.0, keys without a value (`nullable` for instance) can be omitted directly instead of asigning it a value of `N/A`.
 
 ---
 ### Rest API administration
@@ -117,14 +122,14 @@ Each API endpoint supports the following three HTTP verbs: `GET`, `POST`, and `D
 #### GET
 
 Query parameters:
-- `before`, `after`: These query parameters provide filtering support based on the timestamp. Accepts ISO formats. If neither of these parameters are specified, the endpoint will act on the last pushed record.
+- `before`, `after`: These query parameters provide filtering support based on the primary key timestamp. These accept ISO formats, and the range ends are inclusive. If neither of these parameters are specified, the endpoint will return the last pushed record.
 - `fields`: Specifies the fields to return. If omitted, it defaults to all fields. Example on how to specify multiple fields:  
   `?fields=field1&fields=field2`
 
 
 Other examples:
 
-1. Get all records with all columns:
+1. Get all records:
     `/minute-stats/?since=0001-01-01`
 
 2. Retrieve all records for the `grid_voltage_t` field:  
@@ -150,10 +155,9 @@ Query parameters:
 
 #### DELETE
 
-Two actions can be done using a DELETE request: truncating, or deleting all records older than a given date.
+Two actions can be done using a DELETE request: deleting all records older than a given date or truncating.
 
-The action is specified by the `action` parameter and can be either `truncate` or `delete_older_than`.
-For `delete_older_than`, specify the timestamp to the `args` parameter.
+The action is specified by the `action` parameter and can be either `truncate` or `delete_older_than`. For `delete_older_than`, pass the timestamp to the `args` parameter. The timestamp is inclusive.
 
 Examples:
 - `?action=truncate`
@@ -162,8 +166,9 @@ Examples:
 
 ### Rest API endpoints
 
-- `/minute-stats/`: stores data that has minute granularity. The timestamp field is `upload_time`, which is an ISO datetime.
-- `/daily-stats/`: stores data that has daily granularity. The timestamp field is `upload_date`, which is an ISO date.
+- `/minute-stats/`: stores data that has minute granularity. The timestamp field is `upload_datetime` (previously named `upload_time`).
+- `/daily-stats/`: stores data that has daily granularity. The timestamp field is `upload_date`.
+- `/daily-stats-details/`: stores inverter-aggregated stats for each minute. This allows users to calculate their own aggregated values per day instead of depending on the inverter's aggregations and timezone.
 
 ## Django configuration considerations
 

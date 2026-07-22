@@ -2,88 +2,130 @@ name: Django CI
 
 on:
   push:
-    branches: ["main", "develop"]
+    branches:
+      - "**"
   pull_request:
-    branches: ["main", "develop"]
+    branches:
+      - main
+      - develop
 
 jobs:
-  build-with-python-38-39:
+  test-with-python-38:
     runs-on: ubuntu-latest
     strategy:
+      max-parallel: 20
       matrix:
-        python-version: ["3.8", "3.9"]
-        django-version: ["django4.2.txt", "latest.txt"]
+        django-version: ["4.2"]
 
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v3
+      - name: Test API gateway
+        uses: mkfam7/test_solaxx3_api_action@main
         with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install -r "requirements/python${{ matrix.python-version }}/${{ matrix.django-version }}"
-      - name: Run Tests
-        run: |
-          SECRET_KEY="fake" python manage.py test
-      - name: Test setup
-        run: |
-          API_USERNAME=admin API_PASSWORD=admin bash setup.sh
-          API_USERNAME=admin API_PASSWORD=admin bash start.sh -q &
-          sleep 2
-          test '{}' = "$(curl -s "http://localhost:8000/minute-stats/" -u admin:admin)"
-  build-with-python-310-311-312:
+          python-version: "3.8"
+          django-version: ${{ matrix.django-version }}
+
+  test-with-python-39:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
+      max-parallel: 20
       matrix:
-        python-version: ["3.10", "3.11", "3.12"]
-        django-version:
-          ["django4.2.txt","django5.0.txt", "django5.1.txt", "django5.2.txt", "latest.txt"]
-
+        django-version: ["4.2"]
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v3
+      - name: Test API gateway
+        uses: mkfam7/test_solaxx3_api_action@main
         with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install -r "requirements/python${{ matrix.python-version }}/${{ matrix.django-version }}"
-      - name: Run Tests
-        run: |
-          SECRET_KEY="fake" python manage.py test
-      - name: Test setup
-        run: |
-          API_USERNAME=admin API_PASSWORD=admin bash setup.sh
-          API_USERNAME=admin API_PASSWORD=admin bash start.sh -q &
-          sleep 2
-          test '{}' = "$(curl -s "http://localhost:8000/minute-stats/" -u admin:admin)"
-  build-with-python-313:
+          python-version: "3.9"
+          django-version: ${{ matrix.django-version }}
+
+  test-with-python-310:
     runs-on: ubuntu-latest
     strategy:
+      max-parallel: 20
+      fail-fast: false
       matrix:
-        python-version: ["3.13"]
-        django-version:
-          ["django5.1.txt", "django5.2.txt", "latest.txt"]
-
+        django-version: ["4.2", "5.0", "5.1", "5.2"]
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v3
+      - name: Test API gateway
+        uses: mkfam7/test_solaxx3_api_action@main
+        with:
+          python-version: "3.10"
+          django-version: ${{ matrix.django-version }}
+
+  test-with-python-311:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 20
+      fail-fast: false
+      matrix:
+        django-version: ["4.2", "5.0", "5.1", "5.2"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test API gateway
+        uses: mkfam7/test_solaxx3_api_action@main
+        with:
+          python-version: "3.11"
+          django-version: ${{ matrix.django-version }}
+
+  test-with-python-312:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 20
+      fail-fast: false
+      matrix:
+        django-version: ["4.2", "5.0", "5.1", "5.2", "6.0"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test API gateway
+        uses: mkfam7/test_solaxx3_api_action@main
+        with:
+          python-version: "3.12"
+          django-version: ${{ matrix.django-version }}
+
+  test-with-python-313:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 20
+      fail-fast: false
+      matrix:
+        django-version: ["5.1", "5.2", "6.0"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test API gateway
+        uses: mkfam7/test_solaxx3_api_action@main
+        with:
+          python-version: "3.13"
+          django-version: ${{ matrix.django-version }}
+
+  test-with-python-314:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 20
+      fail-fast: false
+      matrix:
+        django-version: ["5.2", "6.0"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test API gateway
+        uses: mkfam7/test_solaxx3_api_action@main
+        with:
+          python-version: "3.14"
+          django-version: ${{ matrix.django-version }}
+
+  test-with-latest-django:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 20
+      fail-fast: false
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test API gateway
+        uses: mkfam7/test_solaxx3_api_action@main
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install -r "requirements/python${{ matrix.python-version }}/${{ matrix.django-version }}"
-      - name: Run Tests
-        run: |
-          SECRET_KEY="fake" python manage.py test
-      - name: Test setup
-        run: |
-          API_USERNAME=admin API_PASSWORD=admin bash setup.sh
-          API_USERNAME=admin API_PASSWORD=admin bash start.sh -q &
-          sleep 2
-          test '{}' = "$(curl -s "http://localhost:8000/minute-stats/" -u admin:admin)"
+          test-latest: true
