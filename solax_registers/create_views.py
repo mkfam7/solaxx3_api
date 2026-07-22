@@ -1,8 +1,8 @@
 from operator import attrgetter
-from typing import Dict, List, Tuple, Type, Union
+from typing import Dict, Type, Union
 
+from django.db.models import DateField
 from django.db.models import Model
-
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import status
@@ -19,9 +19,8 @@ def create_views(
     upload_date_column: str,
     model_serializer: Type[ModelSerializer],
     last_record_model_serializer: Type[ModelSerializer],
-    docs: List[Dict[str, str]],
-    use_datetime: bool = True,
-) -> Tuple[APIView]:
+    docs: Dict[str, str],
+) -> APIView:
     """
     A function that returns a view.
 
@@ -44,6 +43,7 @@ def create_views(
         ```
     """
 
+    use_datetime = not isinstance(model_serializer.Meta.model._meta.pk, DateField)
     if use_datetime:
         get_parameters = documentation.GET_PARAMETERS
     else:

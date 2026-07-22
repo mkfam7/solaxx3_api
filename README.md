@@ -94,6 +94,7 @@ Each dictionary is structured as follows:
 - `nullable` (optional): Whether to store empty values as null in the database.
 - `default` (optional): Any default value in case the user does not specify any value for a column value.
 - `length` (optional): The length of a specified field. Recommended for `float` fields.
+- `primary_key` (optional): Whether the column is the primary key or not. For the API to work, a field with `primary_key` set to `true` should be either `date` or `datetime`.
 
 For the keys `nullable`, `default`, and `length`, a value of `N/A` could be used to indicate an empty value.
 
@@ -165,6 +166,7 @@ Examples:
 
 - `/minute-stats/`: stores data that has minute granularity. The timestamp field is `upload_datetime` (previously named `upload_time`).
 - `/daily-stats/`: stores data that has daily granularity. The timestamp field is `upload_date`.
+- `/daily-stats-details/`: stores inverter-aggregated stats for each minute. This allows users to calculate their own aggregated values per day instead of depending on the inverter's aggregations and timezone.
 
 ## Django configuration considerations
 

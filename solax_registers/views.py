@@ -26,7 +26,6 @@ DailyStats = create_views(
         "post": "Add daily stats.",
         "delete": "Delete daily stats.",
     },
-    use_datetime=False,
 )
 
 
@@ -39,7 +38,6 @@ DailyDetails = create_views(
         "post": "Add daily stats, read minutely.",
         "delete": "Delete daily stats, read minutely.",
     },
-    use_datetime=False,
 )
 
 MinuteStats = create_views(
@@ -51,7 +49,6 @@ MinuteStats = create_views(
         "post": "Add minute stats.",
         "delete": "Delete minute stats.",
     },
-    use_datetime=True,
 )
 
 

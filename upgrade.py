@@ -10,6 +10,7 @@ Run this file in the root directory of the repository.
 This script will do nothing without your explicit approval.
 """
 
+import copy
 import json
 from os import environ, get_terminal_size
 from operator import itemgetter
@@ -107,16 +108,33 @@ def _is_rename_upload_time_upgrade_needed():
     return "upload_time" in columns
 
 
-def info(*args, **kwargs):
-    if not auto_confirm:
-        print(*args, **kwargs)
-
-
 def _do_rename_upload_time_upgrade():
     contents = _get_contents()
     pk_index = get_column_index(contents["minute_stats"], "upload_time")
     contents["minute_stats"][pk_index]["column_name"] = "upload_datetime"
     _write_contents(contents)
+
+
+def _is_add_solax_daily_details_needed():
+    contents = _get_contents()
+    return "solax_daily_details" not in contents.keys()
+
+
+def _do_add_solax_daily_details():
+    contents = _get_contents()
+    contents["solax_daily_details"] = copy.deepcopy(contents["daily_stats"])
+    pk_index = get_column_index(contents["solax_daily_details"], "upload_date")
+    contents["solax_daily_details"][pk_index] = {
+        "column_name": "upload_datetime",
+        "column_type": "datetime",
+        "primary_key": True,
+    }
+    _write_contents(contents)
+
+
+def info(*args, **kwargs):
+    if not auto_confirm:
+        print(*args, **kwargs)
 
 
 terminal_width = get_term_size()
@@ -131,11 +149,23 @@ args = a.parse_args()
 auto_confirm = args.force
 
 needs_an_upgrade = (
-    _is_add_pk_upgrade_needed() or _is_rename_upload_time_upgrade_needed()
+    _is_add_solax_daily_details_needed()
+    or _is_add_pk_upgrade_needed()
+    or _is_rename_upload_time_upgrade_needed()
 )
 if needs_an_upgrade:
     confirm("Are you sure you want to upgrade? You will be prompted before each \
 upgrade action needed. [y/N] ")
+
+needs_an_upgrade = _is_add_solax_daily_details_needed()
+if needs_an_upgrade:
+    confirm(
+        "In this version, a new key for a new endpoint has been introduced. Do you "
+        "want to apply this change to your columns file? [y/N] "
+    )
+
+    _do_add_solax_daily_details()
+    info("Done")
 
 
 needs_an_upgrade = _is_add_pk_upgrade_needed()
