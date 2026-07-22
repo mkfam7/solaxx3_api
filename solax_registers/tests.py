@@ -490,8 +490,8 @@ class GetLastHistoryStatsTests(APITestCase):
         self.assertDictEqual(response.json(), result)
 
 
-class TestHealthz(APITestCase):
-    "Tests for the healthz endpoint"
+class TestEndpoints(APITestCase):
+    "Tests for various endpoints"
 
     def test_healthz(self):
         response = self.client.get(reverse_lazy("healthz"))
@@ -501,8 +501,14 @@ class TestHealthz(APITestCase):
     def test_home(self):
         self.client.get("/")
 
+    def test_docs(self):
+        self.client.get("/docs/")
+
     def test_minute_stats(self):
         self.client.get(reverse_lazy("minute_stats"))
+
+    def test_solax_daily_details(self):
+        self.client.get(reverse_lazy("daily_details"))
 
 
 class TestParseColumnInfo(unittest.TestCase):
