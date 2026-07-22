@@ -124,11 +124,22 @@ def _do_add_solax_daily_details():
     contents = _get_contents()
     contents["solax_daily_details"] = copy.deepcopy(contents["daily_stats"])
     pk_index = get_column_index(contents["solax_daily_details"], "upload_date")
-    contents["solax_daily_details"][pk_index] = {
-        "column_name": "upload_datetime",
-        "column_type": "datetime",
-        "primary_key": True,
-    }
+
+    if pk_index is not None:
+        contents["solax_daily_details"][pk_index] = {
+            "column_name": "upload_datetime",
+            "column_type": "datetime",
+            "primary_key": True,
+        }
+    else:
+        contents["solax_daily_details"].insert(
+            0,
+            {
+                "column_name": "upload_datetime",
+                "column_type": "datetime",
+                "primary_key": True,
+            },
+        )
     _write_contents(contents)
 
 
