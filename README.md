@@ -34,6 +34,8 @@ should be stored.
 bash setup.sh
 ```
 
+If the script prints the error 'Username is already taken', try passing the `-f` parameter to `setup.sh`. See more in the program's help.
+
 The password can be changed from the CLI using the following command:
 
 ```bash
