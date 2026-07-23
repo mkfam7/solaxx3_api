@@ -12,11 +12,10 @@ from rest_framework.serializers import ModelSerializer
 from rest_framework.views import APIView
 
 from .constants import documentation, response_templates
-from .utils import ResponseException, catch400, set_subtract
+from .utils import ResponseException, catch400, get_pk_name_for, set_subtract
 
 
 def create_views(
-    upload_date_column: str,
     model_serializer: Type[ModelSerializer],
     last_record_model_serializer: Type[ModelSerializer],
     docs: Dict[str, str],
@@ -26,8 +25,6 @@ def create_views(
 
     Parameters
     ----------
-    upload_date_column : int
-        column of model representing pushing date.
     model_serializer : rest_framework.serializers.ModelSerializer
         serializer of model.
     last_model_serializer : rest_framework.serializers.ModelSerializer
@@ -44,6 +41,7 @@ def create_views(
     """
 
     use_datetime = not isinstance(model_serializer.Meta.model._meta.pk, DateField)
+    upload_date_column = get_pk_name_for(model_serializer)
     if use_datetime:
         get_parameters = documentation.GET_PARAMETERS
     else:

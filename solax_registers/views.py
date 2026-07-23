@@ -18,7 +18,6 @@ from .serializers import (
 )
 
 DailyStats = create_views(
-    upload_date_column="upload_date",
     model_serializer=DailyStatsSerializer,
     last_record_model_serializer=LastDayStatsSerializer,
     docs={
@@ -30,7 +29,6 @@ DailyStats = create_views(
 
 
 DailyDetails = create_views(
-    upload_date_column="upload_time",
     model_serializer=DailyDetailsSerializer,
     last_record_model_serializer=LastDayDetailsSerializer,
     docs={
@@ -41,7 +39,6 @@ DailyDetails = create_views(
 )
 
 MinuteStats = create_views(
-    upload_date_column="upload_time",
     model_serializer=MinuteStatsSerializer,
     last_record_model_serializer=LastMinuteStatsSerializer,
     docs={

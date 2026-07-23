@@ -24,7 +24,7 @@ STATS_PARAM = OpenApiParameter(
         OpenApiExample(
             name="Passing a list of fields",
             summary="Passing list of fields",
-            value=["upload_time", "grid_voltage_r"],
+            value=["upload_datetime", "grid_voltage_r"],
             description="Finally, you can pass a list of fields.",
         ),
     ],
