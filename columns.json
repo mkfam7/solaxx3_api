@@ -188,7 +188,7 @@
   ],
   "solax_daily_details": [
     {
-      "column_name": "upload_time",
+      "column_name": "upload_datetime",
       "column_type": "datetime",
       "primary_key": true
     },
