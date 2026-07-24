@@ -92,7 +92,7 @@ Each of these keys contains a list of dictionaries, each representing one column
 Each dictionary is structured as follows:
 
 - `column_name`: The name of the column.
-- `column_type`: The type of the column. Must be either `positive_small_integer`, `small_integer`, `integer`, or `float`.
+- `column_type`: The type of the column. See [here](#column-types) for the possible column types. Must be either `positive_small_integer`, `small_integer`, `integer`, or `float`.
 - `nullable` (optional): Whether to store empty values as null in the database.
 - `default` (optional): Any default value in case the user does not specify any value for a column value.
 - `length` (optional): The length of a specified field. Recommended for `float` fields.
@@ -101,6 +101,17 @@ Each dictionary is structured as follows:
 For the keys `nullable`, `default`, and `length`, a value of `N/A` could be used to indicate an empty value.
 
 Starting with version 2.1.0, keys without a value (`nullable` for instance) can be omitted directly instead of asigning it a value of `N/A`.
+
+#### Column types
+
+| Value | Description |
+| ----- | ---- |
+| `positive_small_integer` | A positive small integer. |
+| `small_integer` | A small integer. |
+| `integer` | An integer. |
+| `float` | A column of type `float`. |
+| `date` | A column which stores a date, like `2023-01-01`. |
+| `datetime` | A column which stores a datetime, like `2023-01-01 00:00:00`. |
 
 ---
 ### Rest API administration

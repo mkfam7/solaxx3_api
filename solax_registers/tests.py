@@ -4,6 +4,7 @@ import logging
 import unittest
 
 from django.contrib.auth import get_user_model
+from django.db.models import DateTimeField
 from django.urls import reverse_lazy
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST
 from rest_framework.test import APITestCase
@@ -12,6 +13,7 @@ from .constants import response_templates
 from .models import DailyStatsRecord, LastDayStatsRecord
 from .utils import (
     get_a_nonexistent_column,
+    get_pk_for,
     get_sample_column_values,
     get_model_field_class,
     read_columns_file,
@@ -20,6 +22,16 @@ from .utils import (
 logging.disable()
 User = get_user_model()
 columns = read_columns_file()
+
+pk_col = get_pk_for(DailyStatsRecord)
+datetime_pk = isinstance(pk_col, DateTimeField)
+pk_name = pk_col.name
+
+
+def _(v):
+    if datetime_pk:
+        return v + "T00:00:00Z"
+    return v
 
 
 class AddHistoryStatsTests(APITestCase):
@@ -42,17 +54,20 @@ class AddHistoryStatsTests(APITestCase):
 
         self.client.force_login(self.testuser)
 
-        data = {"upload_date": "2022-01-01"}
+        data = {pk_name: _("2022-01-01")}
         result = get_sample_column_values(
             columns["daily_stats"],
+            pk_name,
             {
                 "positive_small_integer": None,
                 "small_integer": None,
                 "integer": None,
                 "float": None,
+                "date": None,
+                "datetime": None,
             },
-            {"upload_date": "2022-01-01"},
-            datetime_pk=False,
+            {pk_name: _("2022-01-01")},
+            datetime_pk=datetime_pk,
         )
         url = reverse_lazy("daily_stats", current_app="solax_registers")
         response = self.client.post(url, data=data, format="json")
@@ -81,7 +96,7 @@ class AddHistoryStatsTests(APITestCase):
 
         nonexistent_column = get_a_nonexistent_column()
 
-        data = {"upload_date": "2020-01-01", nonexistent_column: "extra_value"}
+        data = {pk_name: _("2020-01-01"), nonexistent_column: "extra_value"}
 
         url = reverse_lazy("daily_stats", current_app="solax_registers")
         response = self.client.post(url, data=data, format="json")
@@ -126,7 +141,7 @@ class AddHistoryStatsTests(APITestCase):
 
         self.client.force_login(self.testuser)
 
-        data = {"upload_date": "2020-01-01"}
+        data = {pk_name: _("2020-01-01")}
 
         url = reverse_lazy("daily_stats", current_app="solax_registers")
         self.client.post(url, data=data, format="json")
@@ -143,7 +158,7 @@ class AddHistoryStatsTests(APITestCase):
 
         self.client.force_login(self.testuser)
 
-        data = {"upload_date": "2020-01-01"}
+        data = {pk_name: _("2020-01-01")}
 
         url = reverse_lazy("daily_stats", current_app="solax_registers")
         self.client.post(url, data=data, format="json")
@@ -159,7 +174,7 @@ class AddHistoryStatsTests(APITestCase):
         """Test posting data with an invalid `overwrite` parameter."""
 
         self.client.force_login(self.testuser)
-        data = {"upload_date": "2020-01-01"}
+        data = {pk_name: _("2020-01-01")}
 
         url = reverse_lazy("daily_stats", current_app="solax_registers")
         response = self.client.post(
@@ -190,9 +205,54 @@ class GetHistoryStatsTests(APITestCase):
 
         DailyStatsRecord.objects.bulk_create(
             [
-                DailyStatsRecord(upload_date="2020-01-01"),
-                DailyStatsRecord(upload_date="2021-01-01"),
-                DailyStatsRecord(upload_date="2022-01-01"),
+                DailyStatsRecord(
+                    **get_sample_column_values(
+                        columns["daily_stats"],
+                        pk_name,
+                        {
+                            "positive_small_integer": None,
+                            "small_integer": None,
+                            "integer": None,
+                            "float": None,
+                            "date": None,
+                            "datetime": None,
+                        },
+                        {pk_name: _("2020-01-01")},
+                        datetime_pk=datetime_pk,
+                    )
+                ),
+                DailyStatsRecord(
+                    **get_sample_column_values(
+                        columns["daily_stats"],
+                        pk_name,
+                        {
+                            "positive_small_integer": None,
+                            "small_integer": None,
+                            "integer": None,
+                            "float": None,
+                            "date": None,
+                            "datetime": None,
+                        },
+                        {pk_name: _("2021-01-01")},
+                        datetime_pk=datetime_pk,
+                    )
+                ),
+                DailyStatsRecord(
+                    **get_sample_column_values(
+                        columns["daily_stats"],
+                        pk_name,
+                        {
+                            "positive_small_integer": None,
+                            "small_integer": None,
+                            "integer": None,
+                            "float": None,
+                            "date": None,
+                            "datetime": None,
+                        },
+                        {pk_name: _("2022-01-01")},
+                        datetime_pk=datetime_pk,
+                    )
+                ),
             ],
         )
 
@@ -204,36 +264,45 @@ class GetHistoryStatsTests(APITestCase):
         result = [
             get_sample_column_values(
                 columns["daily_stats"],
+                pk_name,
                 {
                     "positive_small_integer": None,
                     "small_integer": None,
                     "integer": None,
                     "float": None,
+                    "date": None,
+                    "datetime": None,
                 },
-                {"upload_date": "2020-01-01"},
-                datetime_pk=False,
+                {pk_name: _("2020-01-01")},
+                datetime_pk=datetime_pk,
             ),
             get_sample_column_values(
                 columns["daily_stats"],
+                pk_name,
                 {
                     "positive_small_integer": None,
                     "small_integer": None,
                     "integer": None,
                     "float": None,
+                    "date": None,
+                    "datetime": None,
                 },
-                {"upload_date": "2021-01-01"},
-                datetime_pk=False,
+                {pk_name: _("2021-01-01")},
+                datetime_pk=datetime_pk,
             ),
             get_sample_column_values(
                 columns["daily_stats"],
+                pk_name,
                 {
                     "positive_small_integer": None,
                     "small_integer": None,
                     "integer": None,
                     "float": None,
+                    "date": None,
+                    "datetime": None,
                 },
-                {"upload_date": "2022-01-01"},
-                datetime_pk=False,
+                {pk_name: _("2022-01-01")},
+                datetime_pk=datetime_pk,
             ),
         ]
 
@@ -282,11 +351,11 @@ class GetHistoryStatsTests(APITestCase):
 
         self.client.force_login(self.testuser)
 
-        result = [{"upload_date": "2020-01-01"}, {"upload_date": "2021-01-01"}]
+        result = [{pk_name: _("2020-01-01")}, {pk_name: _("2021-01-01")}]
 
         response = self.client.get(
             reverse_lazy("daily_stats"),
-            QUERY_STRING="fields=upload_date&before=2021-01-01",
+            QUERY_STRING=f"fields={pk_name}&before=2021-01-01",
         )
         self.assertEqual(response.status_code, HTTP_200_OK)
         self.assertListEqual(response.json(), result)
@@ -296,11 +365,11 @@ class GetHistoryStatsTests(APITestCase):
 
         self.client.force_login(self.testuser)
 
-        result = [{"upload_date": "2021-01-01"}, {"upload_date": "2022-01-01"}]
+        result = [{pk_name: _("2021-01-01")}, {pk_name: _("2022-01-01")}]
 
         response = self.client.get(
             reverse_lazy("daily_stats"),
-            QUERY_STRING="fields=upload_date&since=2021-01-01",
+            QUERY_STRING=f"fields={pk_name}&since=2021-01-01",
         )
         self.assertEqual(response.status_code, HTTP_200_OK)
         self.assertListEqual(response.json(), result)
@@ -310,11 +379,11 @@ class GetHistoryStatsTests(APITestCase):
 
         self.client.force_login(self.testuser)
 
-        result = [{"upload_date": "2021-01-01"}]
+        result = [{pk_name: _("2021-01-01")}]
 
         response = self.client.get(
             reverse_lazy("daily_stats"),
-            QUERY_STRING="fields=upload_date&since=2021-01-01&before=2021-01-01",
+            QUERY_STRING=f"fields={pk_name}&since=2021-01-01&before=2021-01-01",
         )
         self.assertEqual(response.status_code, HTTP_200_OK)
         self.assertListEqual(response.json(), result)
@@ -325,14 +394,14 @@ class GetHistoryStatsTests(APITestCase):
         self.client.force_login(self.testuser)
 
         result = [
-            {"upload_date": "2020-01-01"},
-            {"upload_date": "2021-01-01"},
-            {"upload_date": "2022-01-01"},
+            {pk_name: _("2020-01-01")},
+            {pk_name: _("2021-01-01")},
+            {pk_name: _("2022-01-01")},
         ]
 
         response = self.client.get(
             reverse_lazy("daily_stats"),
-            QUERY_STRING="fields=upload_date&since=0001-01-01",
+            QUERY_STRING=f"fields={pk_name}&since=0001-01-01",
         )
         self.assertEqual(response.status_code, HTTP_200_OK)
         self.assertListEqual(response.json(), result)
@@ -356,9 +425,54 @@ class DeleteHistoryStatsTests(APITestCase):
 
         DailyStatsRecord.objects.bulk_create(
             [
-                DailyStatsRecord(upload_date="2020-01-01"),
-                DailyStatsRecord(upload_date="2021-01-01"),
-                DailyStatsRecord(upload_date="2022-01-01"),
+                DailyStatsRecord(
+                    **get_sample_column_values(
+                        columns["daily_stats"],
+                        pk_name,
+                        {
+                            "positive_small_integer": None,
+                            "small_integer": None,
+                            "integer": None,
+                            "float": None,
+                            "date": None,
+                            "datetime": None,
+                        },
+                        {pk_name: _("2020-01-01")},
+                        datetime_pk=datetime_pk,
+                    )
+                ),
+                DailyStatsRecord(
+                    **get_sample_column_values(
+                        columns["daily_stats"],
+                        pk_name,
+                        {
+                            "positive_small_integer": None,
+                            "small_integer": None,
+                            "integer": None,
+                            "float": None,
+                            "date": None,
+                            "datetime": None,
+                        },
+                        {pk_name: _("2021-01-01")},
+                        datetime_pk=datetime_pk,
+                    )
+                ),
+                DailyStatsRecord(
+                    **get_sample_column_values(
+                        columns["daily_stats"],
+                        pk_name,
+                        {
+                            "positive_small_integer": None,
+                            "small_integer": None,
+                            "integer": None,
+                            "float": None,
+                            "date": None,
+                            "datetime": None,
+                        },
+                        {pk_name: _("2022-01-01")},
+                        datetime_pk=datetime_pk,
+                    )
+                ),
             ]
         )
 
@@ -435,7 +549,22 @@ class GetLastHistoryStatsTests(APITestCase):
             is_superuser=True,
         )
         cls.testuser = User.objects.get(username="testuser")
-        LastDayStatsRecord(upload_date="2020-01-01").save()
+        LastDayStatsRecord(
+            **get_sample_column_values(
+                columns["daily_stats"],
+                pk_name,
+                {
+                    "positive_small_integer": None,
+                    "small_integer": None,
+                    "integer": None,
+                    "float": None,
+                    "date": None,
+                    "datetime": None,
+                },
+                {pk_name: _("2020-01-01")},
+                datetime_pk=datetime_pk,
+            )
+        ).save()
 
     def test_get_all_data(self):
         """Try to get all data."""
@@ -444,14 +573,17 @@ class GetLastHistoryStatsTests(APITestCase):
 
         result = get_sample_column_values(
             columns["daily_stats"],
+            pk_name,
             {
                 "positive_small_integer": None,
                 "small_integer": None,
                 "integer": None,
                 "float": None,
+                "date": None,
+                "datetime": None,
             },
-            {"upload_date": "2020-01-01"},
-            datetime_pk=False,
+            {pk_name: _("2020-01-01")},
+            datetime_pk=datetime_pk,
         )
 
         response = self.client.get(reverse_lazy("daily_stats"))
@@ -480,11 +612,11 @@ class GetLastHistoryStatsTests(APITestCase):
 
         self.client.force_login(self.testuser)
 
-        result = {"upload_date": "2020-01-01"}
+        result = {pk_name: _("2020-01-01")}
 
         response = self.client.get(
             reverse_lazy("daily_stats"),
-            QUERY_STRING="fields=upload_date",
+            QUERY_STRING=f"fields={pk_name}",
         )
         self.assertEqual(response.status_code, HTTP_200_OK)
         self.assertDictEqual(response.json(), result)

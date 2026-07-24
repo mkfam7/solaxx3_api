@@ -1,3 +1,4 @@
+import datetime
 from functools import wraps
 import json
 from operator import itemgetter
@@ -226,11 +227,14 @@ def _rename(d: dict, old: str, new: str) -> None:
 
 def get_sample_column_values(
     column_info,
+    pk,
     column_type_fallbacks={
         "positive_small_integer": 0,
         "small_integer": -1,
         "integer": 0,
         "float": 0.6,
+        "date": datetime.datetime.now().date(),
+        "datetime": datetime.datetime.now(),
     },
     column_values={},
     datetime_pk=True,
@@ -246,11 +250,10 @@ def get_sample_column_values(
         elif column_type in column_type_fallbacks:
             result[name] = column_type_fallbacks[column_type]
 
-    date_column = "upload_time" if datetime_pk else "upload_date"
     date_value = column_values.get(
-        date_column, "2022-01-01 00:00" if datetime_pk else "2022-01-01"
+        pk, "2022-01-01 00:00" if datetime_pk else "2022-01-01"
     )
-    result[date_column] = date_value
+    result[pk] = date_value
     return result
 
 
@@ -290,3 +293,14 @@ def catch400(func):
             return exc.args[0]
 
     return inner
+
+
+def get_pk_for(model_or_serializer):
+    try:
+        return model_or_serializer._meta.pk
+    except:
+        return model_or_serializer.Meta.model._meta.pk
+
+
+def get_pk_name_for(model_or_serializer):
+    return get_pk_for(model_or_serializer).name
