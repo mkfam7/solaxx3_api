@@ -77,7 +77,7 @@ STATIC_ROOT = "./static"
 if (4, 0, 0) <= django_version < (5, 0, 0):
     STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-elif django_version < (6, 1, 0):  # based on release notes
+else:
     STORAGES = {
         "default": {
             "BACKEND": "django.core.files.storage.FileSystemStorage",
@@ -128,7 +128,7 @@ An API that manipulates data read from a solar inverter. For more details on how
 use it, consult [the documentation](\
 https://github.com/mkfam7/solaxx3_api?tab=readme-ov-file#rest-api-gateway-for-solar-inverter\
 ).""",
-    "VERSION": "2.1.2",
+    "VERSION": "2.1.3",
     "SERVE_INCLUDE_SCHEMA": False,
     "SWAGGER_UI_DIST": "SIDECAR",
     "SWAGGER_UI_FAVICON_HREF": "SIDECAR",

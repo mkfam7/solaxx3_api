@@ -119,7 +119,7 @@ Starting with version 2.1.0, keys without a value (`nullable` for instance) can 
 For administrative tasks, Django provides a useful web application at `http://host:port/admin`.
 
 ### Documentation
-The API endpoint documentation can be found at `http://host:port/swagger-docs/`.
+The API endpoint documentation can be found at `http://host:port/docs/`.
 
 ### Health check
 The API provides a health check endpoint at `http://host:port/healthz`.
