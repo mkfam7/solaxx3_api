@@ -9,7 +9,6 @@ from .utils import read_columns_file
 columns_config = read_columns_file()
 minute_stats_pk = ""
 daily_stats_pk = ""
-daily_details_pk = ""
 
 
 class MinuteStatsRecord(models.Model):
@@ -62,29 +61,3 @@ class LastDayStatsRecord(models.Model):
 
     def __repr__(self):
         return str(getattr(self, daily_stats_pk))
-
-
-class DailyDetailsRecord(models.Model):
-    """Represents daily inverter data, read minutely."""
-
-    for column_info in columns_config["solax_daily_details"]:
-        if column_info.get("primary_key", None) is True:
-            globals()["daily_details_pk"] = column_info["column_name"]
-
-        locals()[column_info["column_name"]] = get_model_field_class(column_info)
-
-    def __repr__(self):
-        return str(self.pk)
-
-
-class LastDayDetailsRecord(models.Model):
-    """Represents daily inverter data, read minutely."""
-
-    for column_info in columns_config["solax_daily_details"]:
-        if column_info["column_name"] == daily_details_pk:
-            del column_info["primary_key"]
-
-        locals()[column_info["column_name"]] = get_model_field_class(column_info)
-
-    def __repr__(self):
-        return str(getattr(self, daily_details_pk))

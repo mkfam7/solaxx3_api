@@ -179,7 +179,6 @@ Examples:
 
 - `/minute-stats/`: stores data that has minute granularity. The timestamp field is `upload_datetime` (previously named `upload_time`).
 - `/daily-stats/`: stores data that has daily granularity. The timestamp field is `upload_date`.
-- `/daily-stats-details/`: stores inverter-aggregated stats for each minute. This allows users to calculate their own aggregated values per day instead of depending on the inverter's aggregations and timezone.
 
 ## Django configuration considerations
 

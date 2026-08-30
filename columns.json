@@ -163,6 +163,13 @@
       "nullable": true,
       "default": "N/A",
       "length": "N/A"
+    },
+    {
+      "column_name": "daily_total_yield",
+      "column_type": "float",
+      "nullable": true,
+      "default": "N/A",
+      "length": 7
     }
   ],
   "daily_stats": [
@@ -184,23 +191,16 @@
       "nullable": true,
       "default": "N/A",
       "length": 7
-    }
-  ],
-  "solax_daily_details": [
-    {
-      "column_name": "upload_datetime",
-      "column_type": "datetime",
-      "primary_key": true
     },
     {
-      "column_name": "feed_in_energy_today_meter",
+      "column_name": "self_use",
       "column_type": "float",
       "nullable": true,
       "default": "N/A",
       "length": 7
     },
     {
-      "column_name": "total_yield",
+      "column_name": "grid_consumption",
       "column_type": "float",
       "nullable": true,
       "default": "N/A",

@@ -9,9 +9,7 @@ from rest_framework.status import HTTP_200_OK
 
 from .create_views import create_views
 from .serializers import (
-    DailyDetailsSerializer,
     DailyStatsSerializer,
-    LastDayDetailsSerializer,
     LastDayStatsSerializer,
     LastMinuteStatsSerializer,
     MinuteStatsSerializer,
@@ -27,16 +25,6 @@ DailyStats = create_views(
     },
 )
 
-
-DailyDetails = create_views(
-    model_serializer=DailyDetailsSerializer,
-    last_record_model_serializer=LastDayDetailsSerializer,
-    docs={
-        "get": "Get daily stats, read minutely.",
-        "post": "Add daily stats, read minutely.",
-        "delete": "Delete daily stats, read minutely.",
-    },
-)
 
 MinuteStats = create_views(
     model_serializer=MinuteStatsSerializer,

@@ -1,9 +1,7 @@
 from rest_framework.serializers import ModelSerializer
 
 from .models import (
-    DailyDetailsRecord,
     DailyStatsRecord,
-    LastDayDetailsRecord,
     LastDayStatsRecord,
     LastMinuteStatsRecord,
     MinuteStatsRecord,
@@ -31,16 +29,4 @@ class LastMinuteStatsSerializer(ModelSerializer):
 class LastDayStatsSerializer(ModelSerializer):
     class Meta:
         model = LastDayStatsRecord
-        exclude = ("id",)
-
-
-class DailyDetailsSerializer(ModelSerializer):
-    class Meta:
-        model = DailyDetailsRecord
-        fields = "__all__"
-
-
-class LastDayDetailsSerializer(ModelSerializer):
-    class Meta:
-        model = LastDayDetailsRecord
         exclude = ("id",)

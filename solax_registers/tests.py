@@ -622,27 +622,6 @@ class GetLastHistoryStatsTests(APITestCase):
         self.assertDictEqual(response.json(), result)
 
 
-class TestEndpoints(APITestCase):
-    "Tests for various endpoints"
-
-    def test_healthz(self):
-        response = self.client.get(reverse_lazy("healthz"))
-        self.assertEqual(response.json(), "healthy")
-        self.assertEqual(response.status_code, 200)
-
-    def test_home(self):
-        self.client.get("/")
-
-    def test_docs(self):
-        self.client.get("/docs/")
-
-    def test_minute_stats(self):
-        self.client.get(reverse_lazy("minute_stats"))
-
-    def test_solax_daily_details(self):
-        self.client.get(reverse_lazy("daily_details"))
-
-
 class TestParseColumnInfo(unittest.TestCase):
     @unittest.expectedFailure
     def test_parse_with_invalid_type(self):
@@ -785,3 +764,21 @@ class TestParseColumnInfo(unittest.TestCase):
         get_model_field_class(
             {"column_name": "inverter_status", "column_type": "integer"}
         )
+
+
+class TestEndpoints(APITestCase):
+    "Tests for various endpoints"
+
+    def test_healthz(self):
+        response = self.client.get(reverse_lazy("healthz"))
+        self.assertEqual(response.json(), "healthy")
+        self.assertEqual(response.status_code, 200)
+
+    def test_home(self):
+        self.client.get("/")
+
+    def test_docs(self):
+        self.client.get("/docs/")
+
+    def test_minute_stats(self):
+        self.client.get(reverse_lazy("minute_stats"))
