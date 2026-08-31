@@ -13,8 +13,8 @@ class HasModelPermission(BasePermission):
         if request.method in ("OPTIONS", "HEAD"):
             return True
 
-        MAPPINGS = {"GET": "view", "POST": "add", "DELETE": "delete"}
-        action = MAPPINGS[request.method]
+        method_to_action = {"GET": "view", "POST": "add", "DELETE": "delete"}
+        action = method_to_action[request.method]
 
         user = request.user
         model1, model2 = view.model, view.last_record_model

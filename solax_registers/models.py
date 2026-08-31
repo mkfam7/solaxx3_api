@@ -2,23 +2,22 @@
 
 from django.db import models
 
-from solax_registers.utils import get_model_field_class
-
-from .utils import read_columns_file
+from .utils import get_fields_and_pk_name, get_fields_without_pk_flag, read_columns_file
 
 columns_config = read_columns_file()
-minute_stats_pk = ""
-daily_stats_pk = ""
+
+minute_stats_fields, minute_stats_pk = get_fields_and_pk_name(
+    columns_config["minute_stats"]
+)
+daily_stats_fields, daily_stats_pk = get_fields_and_pk_name(
+    columns_config["daily_stats"]
+)
 
 
 class MinuteStatsRecord(models.Model):
     """Represents every-minute inverter data."""
 
-    for column_info in columns_config["minute_stats"]:
-        if column_info.get("primary_key", None) is True:
-            globals()["minute_stats_pk"] = column_info["column_name"]
-
-        locals()[column_info["column_name"]] = get_model_field_class(column_info)
+    locals().update(minute_stats_fields)
 
     def __repr__(self):
         return str(self.pk)
@@ -27,11 +26,9 @@ class MinuteStatsRecord(models.Model):
 class LastMinuteStatsRecord(models.Model):
     """Represents every-minute inverter data."""
 
-    for column_info in columns_config["minute_stats"]:
-        if column_info["column_name"] == minute_stats_pk:
-            del column_info["primary_key"]
-
-        locals()[column_info["column_name"]] = get_model_field_class(column_info)
+    locals().update(
+        get_fields_without_pk_flag(columns_config["minute_stats"], minute_stats_pk)
+    )
 
     def __repr__(self):
         return str(getattr(self, minute_stats_pk))
@@ -40,11 +37,7 @@ class LastMinuteStatsRecord(models.Model):
 class DailyStatsRecord(models.Model):
     """Represents daily inverter data."""
 
-    for column_info in columns_config["daily_stats"]:
-        if column_info.get("primary_key", None) is True:
-            globals()["daily_stats_pk"] = column_info["column_name"]
-
-        locals()[column_info["column_name"]] = get_model_field_class(column_info)
+    locals().update(daily_stats_fields)
 
     def __repr__(self):
         return str(self.pk)
@@ -53,11 +46,9 @@ class DailyStatsRecord(models.Model):
 class LastDayStatsRecord(models.Model):
     """Represents daily inverter data."""
 
-    for column_info in columns_config["daily_stats"]:
-        if column_info["column_name"] == daily_stats_pk:
-            del column_info["primary_key"]
-
-        locals()[column_info["column_name"]] = get_model_field_class(column_info)
+    locals().update(
+        get_fields_without_pk_flag(columns_config["daily_stats"], daily_stats_pk)
+    )
 
     def __repr__(self):
         return str(getattr(self, daily_stats_pk))
